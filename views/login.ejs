@@ -1,0 +1,60 @@
+<%- include('partials/header') %>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Login to Your Account</h3>
+            </div>
+            <div class="card-body">
+                <% if (typeof error !== 'undefined' && error && error.length>0) { %>
+                    <div class="alert alert-danger" role="alert">
+                        <%= error %>
+                    </div>
+                <% } %>
+                
+                <% if (typeof success !== 'undefined' && success && success.length>0) { %>
+                    <div class="alert alert-success" role="alert">
+                        <%= success %>
+                    </div>
+                <% } %>
+                
+                <form action="/login" method="POST">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <a href="/forgot-password">Forgot your password?</a>
+                </div>
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    <a href="/auth/google" class="btn btn-outline-danger">
+                        <i class="bi bi-google"></i> Login with Google
+                    </a>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">Don't have an account? <a href="/signup">Sign up here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
