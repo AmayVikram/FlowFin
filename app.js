@@ -358,7 +358,8 @@ app.post('/transactions/add', ensureAuthenticated, async (req, res) => {
         expense: 0,
         balance: 0
       };
-      
+      user.financialSummary.monthly.push(monthlyRecord);
+      monthlyRecord = user.financialSummary.monthly[user.financialSummary.monthly.length - 1];
     }
     
     // Update monthly record
@@ -370,7 +371,7 @@ app.post('/transactions/add', ensureAuthenticated, async (req, res) => {
     
     monthlyRecord.balance = monthlyRecord.income - monthlyRecord.expense;
 
-    user.financialSummary.monthly.push(monthlyRecord);
+    
     
     // Save user
     await user.save();
