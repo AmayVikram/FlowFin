@@ -1,0 +1,116 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h3>Add New Transaction</h3>
+        </div>
+        <div class="card-body">
+          <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <form action="/transactions/add" method="POST">
+            <div class="mb-3">
+              <label class="form-label">Transaction Type</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="type" id="income" value="income" checked>
+                <label class="form-check-label" for="income">
+                  Income
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="type" id="expense" value="expense">
+                <label class="form-check-label" for="expense">
+                  Expense
+                </label>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="amount" class="form-label">Amount</label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="category" class="form-label">Category</label>
+              <select class="form-select" id="category" name="category" required>
+                <optgroup label="Income Categories" id="incomeCategories">
+                  <option value="Salary">Salary</option>
+                  <option value="Freelance">Freelance</option>
+                  <option value="Investment">Investment</option>
+                  <option value="Gift">Gift</option>
+                  <option value="Other Income">Other Income</option>
+                </optgroup>
+                <optgroup label="Expense Categories" id="expenseCategories" style="display:none;">
+                  <option value="Housing">Housing/Rent</option>
+                  <option value="Food">Food/Groceries</option>
+                  <option value="Transportation">Transportation</option>
+                  <option value="Utilities">Utilities</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Education">Education</option>
+                  <option value="Shopping">Shopping</option>
+                  <option value="Personal Care">Personal Care</option>
+                  <option value="Other Expense">Other Expense</option>
+                </optgroup>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <input type="text" class="form-control" id="description" name="description" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="date" class="form-label">Date</label>
+              <input type="date" class="form-control" id="date" name="date" value="<%= new Date().toISOString().split('T')[0] %>" required>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Add Transaction</button>
+              <a href="/dashboard" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle category options based on transaction type
+  document.addEventListener('DOMContentLoaded', function() {
+    const incomeRadio = document.getElementById('income');
+    const expenseRadio = document.getElementById('expense');
+    const incomeCategories = document.getElementById('incomeCategories');
+    const expenseCategories = document.getElementById('expenseCategories');
+    
+    function updateCategories() {
+      if (incomeRadio.checked) {
+        incomeCategories.style.display = 'block';
+        expenseCategories.style.display = 'none';
+        document.querySelector('#incomeCategories option').selected = true;
+      } else {
+        incomeCategories.style.display = 'none';
+        expenseCategories.style.display = 'block';
+        document.querySelector('#expenseCategories option').selected = true;
+      }
+    }
+    
+    incomeRadio.addEventListener('change', updateCategories);
+    expenseRadio.addEventListener('change', updateCategories);
+    
+    // Initial setup
+    updateCategories();
+  });
+</script>
+
+<%- include('partials/footer') %>

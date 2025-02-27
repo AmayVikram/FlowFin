@@ -216,12 +216,48 @@ app.post('/signup', async (req, res) => {
 });
 
 // Dashboard route (protected)
-app.get('/dashboard', ensureAuthenticated, (req, res) => {
-  res.render('dashboard', {
-    title: 'Dashboard',
-    user: req.user
-  });
+app.get('/dashboard', ensureAuthenticated, async (req, res) => {
+  try {
+    // Get user with financial summary
+    const user = await User.findById(req.user.id);
+    
+    // Get recent transactions (last 5)
+    const recentTransactions = await Transaction.find({ user: req.user.id })
+      .sort({ date: -1 })
+      .limit(5);
+    
+    // Get current month's summary
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    
+    const currentMonthSummary = user.financialSummary.monthly.find(
+      record => record.year === currentYear && record.month === currentMonth
+    ) || { income: 0, expense: 0, balance: 0 };
+    
+    // Get month name
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const currentMonthName = monthNames[currentMonth];
+    
+    res.render('dashboard', {
+      title: 'Dashboard',
+      user: user,
+      financialSummary: user.financialSummary,
+      currentMonthSummary,
+      currentMonthName,
+      currentYear,
+      recentTransactions
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error loading dashboard');
+    res.redirect('/login');
+  }
 });
+
 
 // Logout route
 app.get('/logout', (req, res, next) => {
@@ -232,7 +268,381 @@ app.get('/logout', (req, res, next) => {
   });
 });
 
-// 404 page
+const Transaction = require('./models/transaction');
+
+// Transaction routes
+app.get('/transactions/add', ensureAuthenticated, (req, res) => {
+  res.render('add-transaction', { 
+    title: 'Add Transaction'
+  });
+});
+
+app.post('/transactions/add', ensureAuthenticated, async (req, res) => {
+  try {
+    const { type, amount, category, description, date } = req.body;
+    
+    // Simple validation
+    if (!type || !amount || !category || !description) {
+      return res.render('add-transaction', {
+        title: 'Add Transaction',
+        error: 'Please fill in all fields'
+      });
+    }
+    
+    const parsedAmount = parseFloat(amount);
+    const transactionDate = date ? new Date(date) : new Date();
+    
+    // Create new transaction
+    const newTransaction = new Transaction({
+      user: req.user.id,
+      type,
+      amount: parsedAmount,
+      category,
+      description,
+      date: transactionDate
+    });
+    
+    await newTransaction.save();
+    
+    // Get user
+    const user = await User.findById(req.user.id);
+    
+    // Initialize financialSummary if it doesn't exist
+    if (!user.financialSummary) {
+      user.financialSummary = {
+        totalIncome: 0,
+        totalExpense: 0,
+        balance: 0,
+        monthly: []
+      };
+    }
+    
+    // Update overall totals
+    if (type === 'income') {
+      user.financialSummary.totalIncome += parsedAmount;
+    } else {
+      user.financialSummary.totalExpense += parsedAmount;
+    }
+    
+    user.financialSummary.balance = user.financialSummary.totalIncome - user.financialSummary.totalExpense;
+    
+    // Get year and month
+    const year = transactionDate.getFullYear();
+    const month = transactionDate.getMonth();
+    
+    // Find or create monthly record
+    let monthlyRecord = null;
+    
+    // Check if monthly array exists
+    if (!Array.isArray(user.financialSummary.monthly)) {
+      user.financialSummary.monthly = [];
+      console.log("initializing")
+    }
+    
+    // Look for existing record
+    for (let i = 0; i < user.financialSummary.monthly.length; i++) {
+      if (user.financialSummary.monthly[i].year === year && 
+          user.financialSummary.monthly[i].month === month) {
+        monthlyRecord = user.financialSummary.monthly[i];
+        break;
+      }
+    }
+    
+    // Create new record if not found
+    if (!monthlyRecord) {
+      console.log("yes2")
+      monthlyRecord = {
+        year,
+        month,
+        income: 0,
+        expense: 0,
+        balance: 0
+      };
+      
+    }
+    
+    // Update monthly record
+    if (type === 'income') {
+      monthlyRecord.income += parsedAmount;
+    } else {
+      monthlyRecord.expense += parsedAmount;
+    }
+    
+    monthlyRecord.balance = monthlyRecord.income - monthlyRecord.expense;
+
+    user.financialSummary.monthly.push(monthlyRecord);
+    
+    // Save user
+    await user.save();
+    
+    req.flash('success', 'Transaction added successfully');
+    res.redirect('/transactions');
+  } catch (err) {
+    console.error('Transaction add error:', err);
+    res.render('add-transaction', {
+      title: 'Add Transaction',
+      error: 'Error adding transaction: ' + err.message
+    });
+  }
+});
+
+
+
+
+app.get('/transactions', ensureAuthenticated, async (req, res) => {
+  try {
+    const { type, category, sort } = req.query;
+    
+    // Build filter
+    let filter = { user: req.user.id };
+    if (type) filter.type = type;
+    if (category) filter.category = category;
+    
+    // Build sort
+    let sortOption = { date: -1 }; // Default sort by date descending
+    
+    if (sort) {
+      switch(sort) {
+        case 'date_asc':
+          sortOption = { date: 1 };
+          break;
+        case 'date_desc':
+          sortOption = { date: -1 };
+          break;
+        case 'amount_asc':
+          sortOption = { amount: 1 };
+          break;
+        case 'amount_desc':
+          sortOption = { amount: -1 };
+          break;
+      }
+    }
+    
+    // Get transactions
+    const transactions = await Transaction.find(filter).sort(sortOption);
+    
+    // Calculate totals
+    let totalIncome = 0;
+    let totalExpense = 0;
+    
+    transactions.forEach(transaction => {
+      if (transaction.type === 'income') {
+        totalIncome += transaction.amount;
+      } else {
+        totalExpense += transaction.amount;
+      }
+    });
+    
+    const balance = totalIncome - totalExpense;
+    
+    // Get unique categories for filter dropdown
+    const categories = await Transaction.distinct('category', { user: req.user.id });
+    
+    res.render('transactions', {
+      title: 'Transactions',
+      transactions,
+      totalIncome,
+      totalExpense,
+      balance,
+      categories,
+      type: type || '',
+      category: category || '',
+      sort: sort || 'date_desc'
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error fetching transactions');
+    res.redirect('/dashboard');
+  }
+});
+
+
+app.get('/transactions/edit/:id', ensureAuthenticated, async (req, res) => {
+  try {
+    const transaction = await Transaction.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    });
+    
+    if (!transaction) {
+      req.flash('error', 'Transaction not found');
+      return res.redirect('/transactions');
+    }
+    
+    res.render('edit-transaction', {
+      title: 'Edit Transaction',
+      transaction
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error fetching transaction');
+    res.redirect('/transactions');
+  }
+});
+//   Transactions 
+
+app.post('/transactions/edit/:id', ensureAuthenticated, async (req, res) => {
+  try {
+    const { type, amount, category, description, date } = req.body;
+    const amountNum = parseFloat(amount);
+    
+    // Find original transaction
+    const originalTransaction = await Transaction.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    });
+    
+    if (!originalTransaction) {
+      req.flash('error', 'Transaction not found');
+      return res.redirect('/transactions');
+    }
+    
+    // Get dates for monthly calculations
+    const originalDate = new Date(originalTransaction.date);
+    const originalYear = originalDate.getFullYear();
+    const originalMonth = originalDate.getMonth();
+    
+    const newDate = date ? new Date(date) : originalDate;
+    const newYear = newDate.getFullYear();
+    const newMonth = newDate.getMonth();
+    
+    // Update user's financial summary
+    const user = await User.findById(req.user.id);
+    
+    // Remove original transaction from totals
+    if (originalTransaction.type === 'income') {
+      user.financialSummary.totalIncome -= originalTransaction.amount;
+    } else {
+      user.financialSummary.totalExpense -= originalTransaction.amount;
+    }
+    
+    // Remove original transaction from monthly summary
+    let originalMonthRecord = user.financialSummary.monthly.find(
+      record => record.year === originalYear && record.month === originalMonth
+    );
+    
+    if (originalMonthRecord) {
+      if (originalTransaction.type === 'income') {
+        originalMonthRecord.income -= originalTransaction.amount;
+      } else {
+        originalMonthRecord.expense -= originalTransaction.amount;
+      }
+      originalMonthRecord.balance = originalMonthRecord.income - originalMonthRecord.expense;
+    }
+    
+    // Update transaction
+    originalTransaction.type = type;
+    originalTransaction.amount = amountNum;
+    originalTransaction.category = category;
+    originalTransaction.description = description;
+    originalTransaction.date = newDate;
+    
+    await originalTransaction.save();
+    
+    // Add the new transaction to totals
+    if (type === 'income') {
+      user.financialSummary.totalIncome += amountNum;
+    } else {
+      user.financialSummary.totalExpense += amountNum;
+    }
+    user.financialSummary.balance = user.financialSummary.totalIncome - user.financialSummary.totalExpense;
+    
+    // Add to new monthly summary
+    let newMonthRecord = user.financialSummary.monthly.find(
+      record => record.year === newYear && record.month === newMonth
+    );
+    
+    if (!newMonthRecord) {
+      // Create new monthly record if it doesn't exist
+      newMonthRecord = {
+        year: newYear,
+        month: newMonth,
+        income: 0,
+        expense: 0,
+        balance: 0
+      };
+      user.financialSummary.monthly.push(newMonthRecord);
+    }
+    
+    // Update the monthly record
+    if (type === 'income') {
+      newMonthRecord.income += amountNum;
+    } else {
+      newMonthRecord.expense += amountNum;
+    }
+    newMonthRecord.balance = newMonthRecord.income - newMonthRecord.expense;
+    
+    await user.save();
+    
+    req.flash('success', 'Transaction updated successfully');
+    res.redirect('/transactions');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error updating transaction');
+    res.redirect('/transactions');
+  }
+});
+
+app.get('/transactions/delete/:id', ensureAuthenticated, async (req, res) => {
+  try {
+    // Find transaction
+    const transaction = await Transaction.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    });
+    
+    if (!transaction) {
+      req.flash('error', 'Transaction not found');
+      return res.redirect('/transactions');
+    }
+    
+    // Get date for monthly calculations
+    const transactionDate = new Date(transaction.date);
+    const year = transactionDate.getFullYear();
+    const month = transactionDate.getMonth();
+    
+    // Update user's financial summary
+    const user = await User.findById(req.user.id);
+    
+    // Update total summary
+    if (transaction.type === 'income') {
+      user.financialSummary.totalIncome -= transaction.amount;
+    } else {
+      user.financialSummary.totalExpense -= transaction.amount;
+    }
+    user.financialSummary.balance = user.financialSummary.totalIncome - user.financialSummary.totalExpense;
+    
+    // Update monthly summary
+    let monthlyRecord = user.financialSummary.monthly.find(
+      record => record.year === year && record.month === month
+    );
+    
+    if (monthlyRecord) {
+      if (transaction.type === 'income') {
+        monthlyRecord.income -= transaction.amount;
+      } else {
+        monthlyRecord.expense -= transaction.amount;
+      }
+      monthlyRecord.balance = monthlyRecord.income - monthlyRecord.expense;
+    }
+    
+    await user.save();
+    
+    // Delete the transaction
+    await Transaction.findByIdAndDelete(req.params.id);
+    
+    req.flash('success', 'Transaction deleted successfully');
+    res.redirect('/transactions');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error deleting transaction');
+    res.redirect('/transactions');
+  }
+});
+
+
+
+
 
 
 // Start server

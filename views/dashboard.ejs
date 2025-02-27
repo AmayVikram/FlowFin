@@ -1,35 +1,218 @@
 <%- include('partials/header') %>
-
-<div class="container">
-  <div class="row">
-    <div class="col-md-8 mx-auto">
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-          <h3>Welcome to your Dashboard</h3>
+  <div class="container"> <!-- Welcome Card -->
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <div class="card shadow">
+          <div class="card-header bg-primary text-white">
+            <h3>Welcome to your Dashboard</h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-8">
+                <h4>Hello, <%= user.fullName %>!</h4>
+                <p>Email: <%= user.email %>
+                </p>
+                <p>Account created: <%= user.createdAt.toLocaleDateString() %>
+                </p>
+              </div>
+              <div class="col-md-4 text-end"> <a href="/transactions/add" class="btn btn-success btn-lg mb-2 w-100"> <i
+                    class="bi bi-plus-circle"></i> Add Transaction </a> <a href="/transactions"
+                  class="btn btn-primary btn-lg w-100"> <i class="bi bi-list-ul"></i> View All Transactions </a> </div>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <h4>Hello, <%= user.fullName %>!</h4>
-          <p>Email: <%= user.email %></p>
-          <p>Account created: <%= user.createdAt.toLocaleDateString() %></p>
-          
-          <div class="mt-4">
-            <h5>What would you like to do today?</h5>
-            <div class="list-group mt-3">
-              <a href="/profile" class="list-group-item list-group-item-action">
-                <i class="bi bi-person-circle"></i> View Profile
-              </a>
-              <a href="/settings" class="list-group-item list-group-item-action">
-                <i class="bi bi-gear"></i> Account Settings
-              </a>
-              <a href="/logout" class="list-group-item list-group-item-action text-danger">
-                <i class="bi bi-box-arrow-right"></i> Logout
-              </a>
+      </div>
+    </div> <!-- Financial Overview Section -->
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <div class="card shadow">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Financial Overview</h4> <span class="badge bg-light text-dark">Last Updated: <%= new
+                Date().toLocaleDateString() %></span>
+          </div>
+          <div class="card-body"> <!-- All-Time Summary -->
+            <h5 class="card-title"> <i class="bi bi-clock-history"></i> All-Time Summary </h5>
+            <div class="row mb-4">
+              <div class="col-md-4 mb-3">
+                <div class="card bg-success text-white">
+                  <div class="card-body text-center"> <i class="bi bi-cash-stack fs-1 mb-2"></i>
+                    <h5>Total Income</h5>
+                    <h3>₹<%= financialSummary.totalIncome.toFixed(2) %>
+                    </h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card bg-danger text-white">
+                  <div class="card-body text-center"> <i class="bi bi-cart-x fs-1 mb-2"></i>
+                    <h5>Total Expenses</h5>
+                    <h3>₹<%= financialSummary.totalExpense.toFixed(2) %>
+                    </h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card <%= financialSummary.balance >= 0 ? 'bg-primary' : 'bg-warning' %> text-white">
+                  <div class="card-body text-center"> <i class="bi bi-bank fs-1 mb-2"></i>
+                    <h5>Overall Balance</h5>
+                    <h3>₹<%= financialSummary.balance.toFixed(2) %>
+                    </h3>
+                    <% if (financialSummary.balance>= 0) { %> <div class="progress mt-2" style="height: 8px;">
+                        <div class="progress-bar bg-light" role="progressbar"
+                          style="width: <%= Math.min(100, (financialSummary.balance / financialSummary.totalIncome) * 100) %>%">
+                        </div>
+                      </div>
+                      <% } else { %>
+                        <div class="progress mt-2" style="height: 8px;">
+                          <div class="progress-bar bg-light" role="progressbar" style="width: 100%"></div>
+                        </div> <small class="mt-1"><i class="bi bi-exclamation-triangle"></i> Negative balance</small>
+                        <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            
+            <!-- Current Month Summary -->
+            <h5 class="card-title mt-4">
+              <i class="bi bi-calendar-month"></i>
+              <%= currentMonthName %>
+                <%= currentYear %> Summary
+            </h5>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <div class="card bg-success text-white">
+                  <div class="card-body text-center">
+                    <i class="bi bi-graph-up-arrow fs-1 mb-2"></i>
+                    <h5>Monthly Income</h5>
+                    <h3>₹<%= currentMonthSummary.income.toFixed(2) %>
+                    </h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card bg-danger text-white">
+                  <div class="card-body text-center">
+                    <i class="bi bi-graph-down-arrow fs-1 mb-2"></i>
+                    <h5>Monthly Expenses</h5>
+                    <h3>₹<%= currentMonthSummary.expense.toFixed(2) %>
+                    </h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card <%= currentMonthSummary.balance >= 0 ? 'bg-primary' : 'bg-warning' %> text-white">
+                  <div class="card-body text-center">
+                    <i class="bi bi-wallet2 fs-1 mb-2"></i>
+                    <h5>Monthly Balance</h5>
+                    <h3>₹<%= currentMonthSummary.balance.toFixed(2) %>
+                    </h3>
+                    <% if (currentMonthSummary.income> 0) { %>
+                      <div class="progress mt-2" style="height: 8px;">
+                        <div class="progress-bar bg-light" role="progressbar"
+                          style="width: <%= Math.min(100, Math.max(0, (currentMonthSummary.balance / currentMonthSummary.income) * 100)) %>%">
+                        </div>
+                      </div>
+                      <% } %>
+                        <% if (currentMonthSummary.balance < 0) { %>
+                          <small class="mt-1"><i class="bi bi-exclamation-triangle"></i> You're spending more than you
+                            earn!</small>
+                          <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- Recent Transactions Section -->
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <div class="card shadow">
+          <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Recent Transactions</h4> <a href="/transactions" class="btn btn-light btn-sm">View All</a>
+          </div>
+          <div class="card-body">
+            <% if (recentTransactions && recentTransactions.length> 0) { %> <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Type</th>
+                      <th>Category</th>
+                      <th>Description</th>
+                      <th class="text-end">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% recentTransactions.forEach(transaction=> { %> <tr>
+                        <td>
+                          <%= new Date(transaction.date).toLocaleDateString() %>
+                        </td>
+                        <td> <span class="badge <%= transaction.type === 'income' ? 'bg-success' : 'bg-danger' %>">
+                            <%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %>
+                          </span> </td>
+                        <td>
+                          <%= transaction.category %>
+                        </td>
+                        <td>
+                          <%= transaction.description %>
+                        </td>
+                        <td
+                          class="text-end <%= transaction.type === 'income' ? 'text-success' : 'text-danger' %> fw-bold">
+                          ₹<%= transaction.amount.toFixed(2) %>
+                        </td>
+                      </tr>
+                      <% }); %>
+                  </tbody>
+                </table>
+              </div>
+              <% } else { %>
+                <div class="text-center py-5"> <i class="bi bi-receipt fs-1 text-muted"></i>
+                  <h5 class="mt-3">No transactions yet</h5>
+                  <p class="text-muted">Start tracking your finances by adding your first transaction.</p> <a
+                    href="/transactions/add" class="btn btn-primary mt-2">Add Transaction</a>
+                </div>
+                <% } %>
+          </div>
+        </div>
+      </div>
+    </div> <!-- Financial Management Section -->
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <div class="card shadow">
+          <div class="card-header bg-primary text-white">
+            <h4>Quick Actions</h4>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                  <div class="card-body text-center"> <i class="bi bi-plus-circle fs-1 text-success mb-3"></i>
+                    <h5>Add Transaction</h5>
+                    <p>Record a new income or expense</p>
+                    <div class="d-grid gap-2"> <a href="/transactions/add?type=income"
+                        class="btn btn-outline-success">Add Income</a> <a href="/transactions/add?type=expense"
+                        class="btn btn-outline-danger">Add Expense</a> </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                  <div class="card-body text-center"> <i class="bi bi-bar-chart-fill fs-1 text-primary mb-3"></i>
+                    <h5>Financial Reports</h5>
+                    <p>Analyze your financial data</p>
+                    <div class="d-grid gap-2"> <a href="/transactions" class="btn btn-outline-primary">Transaction
+                        History</a> <a href="/reports/monthly" class="btn btn-outline-info">Monthly Reports</a> </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>

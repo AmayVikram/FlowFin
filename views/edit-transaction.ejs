@@ -1,0 +1,119 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h3>Edit Transaction</h3>
+        </div>
+        <div class="card-body">
+          <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <form action="/transactions/edit/<%= transaction._id %>" method="POST">
+            <div class="mb-3">
+              <label class="form-label">Transaction Type</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="type" id="income" value="income" 
+                       <%= transaction.type === 'income' ? 'checked' : '' %>>
+                <label class="form-check-label" for="income">
+                  Income
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="type" id="expense" value="expense"
+                       <%= transaction.type === 'expense' ? 'checked' : '' %>>
+                <label class="form-check-label" for="expense">
+                  Expense
+                </label>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="amount" class="form-label">Amount</label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" step="0.01" class="form-control" id="amount" name="amount" 
+                       value="<%= transaction.amount %>" required>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="category" class="form-label">Category</label>
+              <select class="form-select" id="category" name="category" required>
+                <optgroup label="Income Categories" id="incomeCategories">
+                  <option value="Salary" <%= transaction.category === 'Salary' ? 'selected' : '' %>>Salary</option>
+                  <option value="Freelance" <%= transaction.category === 'Freelance' ? 'selected' : '' %>>Freelance</option>
+                  <option value="Investment" <%= transaction.category === 'Investment' ? 'selected' : '' %>>Investment</option>
+                  <option value="Gift" <%= transaction.category === 'Gift' ? 'selected' : '' %>>Gift</option>
+                  <option value="Other Income" <%= transaction.category === 'Other Income' ? 'selected' : '' %>>Other Income</option>
+                </optgroup>
+                <optgroup label="Expense Categories" id="expenseCategories">
+                  <option value="Housing" <%= transaction.category === 'Housing' ? 'selected' : '' %>>Housing/Rent</option>
+                  <option value="Food" <%= transaction.category === 'Food' ? 'selected' : '' %>>Food/Groceries</option>
+                  <option value="Transportation" <%= transaction.category === 'Transportation' ? 'selected' : '' %>>Transportation</option>
+                  <option value="Utilities" <%= transaction.category === 'Utilities' ? 'selected' : '' %>>Utilities</option>
+                  <option value="Entertainment" <%= transaction.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+                  <option value="Healthcare" <%= transaction.category === 'Healthcare' ? 'selected' : '' %>>Healthcare</option>
+                  <option value="Education" <%= transaction.category === 'Education' ? 'selected' : '' %>>Education</option>
+                  <option value="Shopping" <%= transaction.category === 'Shopping' ? 'selected' : '' %>>Shopping</option>
+                  <option value="Personal Care" <%= transaction.category === 'Personal Care' ? 'selected' : '' %>>Personal Care</option>
+                  <option value="Other Expense" <%= transaction.category === 'Other Expense' ? 'selected' : '' %>>Other Expense</option>
+                </optgroup>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <input type="text" class="form-control" id="description" name="description" 
+                     value="<%= transaction.description %>" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="date" class="form-label">Date</label>
+              <input type="date" class="form-control" id="date" name="date" 
+                     value="<%= transaction.date.toISOString().split('T')[0] %>" required>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Update Transaction</button>
+              <a href="/transactions" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle category options based on transaction type
+  document.addEventListener('DOMContentLoaded', function() {
+    const incomeRadio = document.getElementById('income');
+    const expenseRadio = document.getElementById('expense');
+    const incomeCategories = document.getElementById('incomeCategories');
+    const expenseCategories = document.getElementById('expenseCategories');
+    
+    function updateCategories() {
+      if (incomeRadio.checked) {
+        incomeCategories.style.display = 'block';
+        expenseCategories.style.display = 'none';
+      } else {
+        incomeCategories.style.display = 'none';
+        expenseCategories.style.display = 'block';
+      }
+    }
+    
+    incomeRadio.addEventListener('change', updateCategories);
+    expenseRadio.addEventListener('change', updateCategories);
+    
+    // Initial setup
+    updateCategories();
+  });
+</script>
+
+<%- include('partials/footer') %>
