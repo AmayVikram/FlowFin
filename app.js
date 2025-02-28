@@ -10,6 +10,11 @@ const flash = require('connect-flash');
 const path = require('path');
 const dotenv = require('dotenv');
 const User = require('./models/User');
+const Goal = require('./models/Goal')
+const transactionRoutes = require('./transactionRoutes');
+
+// Add this after your other app.use statements
+
 
 // Load environment variables
 dotenv.config();
@@ -56,7 +61,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const authRoutes = require('./Googleauth');
-app.use('/', authRoutes);
+
 
 // Passport Local Strategy
 passport.use(new LocalStrategy(
@@ -116,6 +121,9 @@ const ensureAuthenticated = (req, res, next) => {
   req.flash('error', 'Please log in to view this resource');
   res.redirect('/login');
 };
+
+app.use('/', transactionRoutes);
+app.use('/', authRoutes);
 
 // Routes
 app.get('/', (req, res) => {
@@ -241,16 +249,69 @@ app.get('/dashboard', ensureAuthenticated, async (req, res) => {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
     const currentMonthName = monthNames[currentMonth];
+
+    const goals = await Goal.find({ user: req.user.id })
+      .sort({ targetDate: 1 })
+      .limit(3); 
     
-    res.render('dashboard', {
-      title: 'Dashboard',
-      user: user,
-      financialSummary: user.financialSummary,
-      currentMonthSummary,
-      currentMonthName,
-      currentYear,
-      recentTransactions
-    });
+      const reminders = await Reminder.find({ 
+        user: req.user.id,
+        isPaid: false
+      }).sort({ dueDate: 1 });
+      
+      // Calculate upcoming and overdue reminders
+      const today = new Date();
+      const upcomingReminders = reminders.filter(reminder => {
+        const dueDate = new Date(reminder.dueDate);
+        return dueDate >= today;
+      }).map(reminder => {
+        const reminderObj = reminder.toObject();
+        
+        // Calculate if reminder is due soon
+        const dueDate = new Date(reminder.dueDate);
+        const diffTime = dueDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        reminderObj.daysUntilDue = diffDays;
+        reminderObj.isDueSoon = diffDays <= reminder.reminderDays;
+        
+        return reminderObj;
+      });
+      
+      const overdueReminders = reminders.filter(reminder => {
+        const dueDate = new Date(reminder.dueDate);
+        return dueDate < today;
+      }).map(reminder => {
+        const reminderObj = reminder.toObject();
+        
+        // Calculate days overdue
+        const dueDate = new Date(reminder.dueDate);
+        const diffTime = today - dueDate;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        reminderObj.daysUntilDue = -diffDays; // Negative to show overdue
+        
+        return reminderObj;
+      });
+      
+      // Calculate total upcoming and overdue amounts
+      const totalUpcoming = upcomingReminders.reduce((sum, reminder) => sum + reminder.amount, 0);
+      const totalOverdue = overdueReminders.reduce((sum, reminder) => sum + reminder.amount, 0);
+      
+      res.render('dashboard', {
+        title: 'Dashboard',
+        user: user,
+        financialSummary: user.financialSummary,
+        currentMonthSummary,
+        currentMonthName,
+        currentYear,
+        recentTransactions,
+        goals,
+        upcomingReminders,
+        overdueReminders,
+        totalUpcoming,
+        totalOverdue
+      });
   } catch (err) {
     console.error(err);
     req.flash('error', 'Error loading dashboard');
@@ -418,23 +479,14 @@ app.get('/transactions', ensureAuthenticated, async (req, res) => {
           break;
       }
     }
-    
+    const user = await User.findById(req.user.id);
     // Get transactions
     const transactions = await Transaction.find(filter).sort(sortOption);
     
     // Calculate totals
-    let totalIncome = 0;
-    let totalExpense = 0;
-    
-    transactions.forEach(transaction => {
-      if (transaction.type === 'income') {
-        totalIncome += transaction.amount;
-      } else {
-        totalExpense += transaction.amount;
-      }
-    });
-    
-    const balance = totalIncome - totalExpense;
+    const totalIncome = user.financialSummary?.totalIncome || 0;
+    const totalExpense = user.financialSummary?.totalExpense || 0;
+    const balance = user.financialSummary?.balance || 0;
     
     // Get unique categories for filter dropdown
     const categories = await Transaction.distinct('category', { user: req.user.id });
@@ -640,6 +692,805 @@ app.get('/transactions/delete/:id', ensureAuthenticated, async (req, res) => {
     res.redirect('/transactions');
   }
 });
+
+app.get('/reports/monthly', ensureAuthenticated, async (req, res) => {
+  try {
+    // Get user with financial summary
+    const user = await User.findById(req.user.id);
+    
+    // Get all transactions
+    const transactions = await Transaction.find({ user: req.user.id });
+    
+    // Get month names
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    // Ensure monthly array exists
+    const monthlySummaries = user.financialSummary && Array.isArray(user.financialSummary.monthly) 
+      ? [...user.financialSummary.monthly] 
+      : [];
+    
+    // Sort by date (newest first)
+    monthlySummaries.sort((a, b) => {
+      if (a.year !== b.year) return b.year - a.year;
+      return b.month - a.month;
+    });
+    
+    // Format monthly data for display with default values
+    const formattedMonthlySummaries = monthlySummaries.map(summary => ({
+      year: summary.year || 0,
+      month: summary.month || 0,
+      income: summary.income || 0,
+      expense: summary.expense || 0,
+      balance: summary.balance || 0,
+      monthName: monthNames[summary.month] || 'Unknown',
+      displayName: `${monthNames[summary.month] || 'Unknown'} ${summary.year || 0}`
+    }));
+    
+    // Calculate category totals
+    const categoryTotals = {};
+    const incomeByCategory = {};
+    const expenseByCategory = {};
+    
+    // Calculate transaction totals by date for timeline
+    const transactionsByDate = {};
+    let cumulativeIncome = 0;
+    let cumulativeExpense = 0;
+    
+    transactions.forEach(transaction => {
+      const dateKey = new Date(transaction.date).toISOString().split('T')[0];
+      
+      // Overall category totals
+      if (!categoryTotals[transaction.category]) {
+        categoryTotals[transaction.category] = 0;
+      }
+      categoryTotals[transaction.category] += transaction.amount;
+      
+      // Split by transaction type
+      if (transaction.type === 'income') {
+        if (!incomeByCategory[transaction.category]) {
+          incomeByCategory[transaction.category] = 0;
+        }
+        incomeByCategory[transaction.category] += transaction.amount;
+        cumulativeIncome += transaction.amount;
+      } else {
+        if (!expenseByCategory[transaction.category]) {
+          expenseByCategory[transaction.category] = 0;
+        }
+        expenseByCategory[transaction.category] += transaction.amount;
+        cumulativeExpense += transaction.amount;
+      }
+      
+      // Accumulate by date
+      if (!transactionsByDate[dateKey]) {
+        transactionsByDate[dateKey] = {
+          income: 0,
+          expense: 0
+        };
+      }
+      
+      if (transaction.type === 'income') {
+        transactionsByDate[dateKey].income += transaction.amount;
+      } else {
+        transactionsByDate[dateKey].expense += transaction.amount;
+      }
+    });
+    
+    // Prepare timeline data
+    const timelineDates = Object.keys(transactionsByDate).sort();
+    const timelineData = {
+      dates: timelineDates,
+      incomeData: timelineDates.map(date => transactionsByDate[date].income),
+      expenseData: timelineDates.map(date => transactionsByDate[date].expense)
+    };
+    
+    // Prepare data for monthly trend chart (last 6 months or all if less)
+    const last6Months = formattedMonthlySummaries.slice(0, Math.min(6, formattedMonthlySummaries.length)).reverse();
+    const monthlyLabels = last6Months.map(m => m.displayName);
+    const monthlyIncomeData = last6Months.map(m => m.income);
+    const monthlyExpenseData = last6Months.map(m => m.expense);
+    const monthlyBalanceData = last6Months.map(m => m.balance);
+    
+    // Prepare data for category pie charts
+    const incomeCategoryLabels = Object.keys(incomeByCategory);
+    const incomeCategoryData = Object.values(incomeByCategory);
+    
+    const expenseCategoryLabels = Object.keys(expenseByCategory);
+    const expenseCategoryData = Object.values(expenseByCategory);
+    
+    // Calculate top spending categories
+    const topExpenseCategories = Object.entries(expenseByCategory)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([category, amount]) => ({ category, amount }));
+    
+    // Calculate income vs expense ratio
+    const incomeVsExpenseData = {
+      labels: ['Income', 'Expenses'],
+      data: [cumulativeIncome, cumulativeExpense]
+    };
+    
+    // Get financial summary with defaults
+    const financialSummary = {
+      totalIncome: user.financialSummary?.totalIncome || 0,
+      totalExpense: user.financialSummary?.totalExpense || 0,
+      balance: user.financialSummary?.balance || 0
+    };
+    
+    res.render('monthly-reports', {
+      title: 'Monthly Financial Reports',
+      user,
+      financialSummary,
+      monthlySummaries: formattedMonthlySummaries,
+      monthlyLabels: JSON.stringify(monthlyLabels),
+      monthlyIncomeData: JSON.stringify(monthlyIncomeData),
+      monthlyExpenseData: JSON.stringify(monthlyExpenseData),
+      monthlyBalanceData: JSON.stringify(monthlyBalanceData),
+      incomeCategoryLabels: JSON.stringify(incomeCategoryLabels),
+      incomeCategoryData: JSON.stringify(incomeCategoryData),
+      expenseCategoryLabels: JSON.stringify(expenseCategoryLabels),
+      expenseCategoryData: JSON.stringify(expenseCategoryData),
+      timelineData: JSON.stringify(timelineData),
+      incomeVsExpenseData: JSON.stringify(incomeVsExpenseData),
+      topExpenseCategories
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error generating reports: ' + err.message);
+    res.redirect('/dashboard');
+  }
+});
+
+
+// Goal routes
+app.get('/goals', ensureAuthenticated, async (req, res) => {
+  try {
+    const { status, category, sort } = req.query;
+    
+    // Build filter
+    let filter = { user: req.user.id };
+    
+    if (status === 'active') {
+      filter.isCompleted = false;
+    } else if (status === 'completed') {
+      filter.isCompleted = true;
+    }
+    
+    if (category) {
+      filter.category = category;
+    }
+    
+    // Build sort
+    let sortOption = { targetDate: 1 }; // Default sort by deadline (ascending)
+    
+    if (sort) {
+      switch(sort) {
+        case 'deadline_asc':
+          sortOption = { targetDate: 1 };
+          break;
+        case 'deadline_desc':
+          sortOption = { targetDate: -1 };
+          break;
+        case 'amount_asc':
+          sortOption = { targetAmount: 1 };
+          break;
+        case 'amount_desc':
+          sortOption = { targetAmount: -1 };
+          break;
+        case 'progress_asc':
+          // We'll handle this after fetching
+          sortOption = { targetDate: 1 };
+          break;
+        case 'progress_desc':
+          // We'll handle this after fetching
+          sortOption = { targetDate: 1 };
+          break;
+      }
+    }
+    
+    // Fetch goals
+    let goals = await Goal.find(filter).sort(sortOption);
+    
+    // Calculate virtual properties
+    goals = goals.map(goal => {
+      const goalObj = goal.toObject({ virtuals: true });
+      
+      // Calculate progress percentage
+      goalObj.progressPercentage = Math.min(100, (goal.currentAmount / goal.targetAmount) * 100);
+      
+      // Calculate if goal is on track
+      const today = new Date();
+      const totalDuration = goal.targetDate - goal.startDate;
+      const elapsedDuration = today - goal.startDate;
+      const expectedProgress = (elapsedDuration / totalDuration) * goal.targetAmount;
+      goalObj.isOnTrack = goal.isCompleted || goal.currentAmount >= expectedProgress;
+      
+      // Calculate days remaining
+      const diffTime = goal.targetDate - today;
+      goalObj.daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      return goalObj;
+    });
+    
+    // Handle special sort cases
+    if (sort === 'progress_asc') {
+      goals.sort((a, b) => a.progressPercentage - b.progressPercentage);
+    } else if (sort === 'progress_desc') {
+      goals.sort((a, b) => b.progressPercentage - a.progressPercentage);
+    }
+    
+    res.render('goals', {
+      title: 'Financial Goals',
+      goals,
+      status: status || '',
+      category: category || '',
+      sort: sort || 'deadline_asc'
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error fetching goals');
+    res.redirect('/dashboard');
+  }
+});
+
+
+app.get('/goals/add', ensureAuthenticated, (req, res) => {
+  res.render('add-goal', {
+    title: 'Add New Goal'
+  });
+});
+
+app.post('/goals/add', ensureAuthenticated, async (req, res) => {
+  try {
+    const { name, description, category, targetAmount, initialAmount, targetDate, priority } = req.body;
+    const parsedInitialAmount = parseFloat(initialAmount || 0);
+    
+    const newGoal = new Goal({
+      user: req.user.id,
+      name,
+      description,
+      category,
+      targetAmount: parseFloat(targetAmount),
+      currentAmount: parsedInitialAmount,
+      targetDate: new Date(targetDate),
+      priority
+    });
+    
+    await newGoal.save();
+    
+    // If there's an initial amount, create a transaction and update financial summary
+    if (parsedInitialAmount > 0) {
+      // Create a transaction for the initial amount
+      const transaction = new Transaction({
+        user: req.user.id,
+        type: 'expense',
+        amount: parsedInitialAmount,
+        category: 'Goal Contribution',
+        description: `Initial contribution to ${name}`,
+        date: new Date()
+      });
+      
+      await transaction.save();
+      
+      // Link the transaction to the goal
+      newGoal.linkedTransactions = [transaction._id];
+      await newGoal.save();
+      
+      // Update user's financial summary
+      const user = await User.findById(req.user.id);
+      
+      // Update overall totals
+      user.financialSummary.totalExpense += parsedInitialAmount;
+      user.financialSummary.balance = user.financialSummary.totalIncome - user.financialSummary.totalExpense;
+      
+      // Update monthly record
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth();
+      
+      // Find or create monthly record
+      let monthlyRecord = user.financialSummary.monthly.find(
+        record => record.year === year && record.month === month
+      );
+      
+      if (!monthlyRecord) {
+        monthlyRecord = {
+          year,
+          month,
+          income: 0,
+          expense: 0,
+          balance: 0
+        };
+        user.financialSummary.monthly.push(monthlyRecord);
+        monthlyRecord = user.financialSummary.monthly[user.financialSummary.monthly.length - 1];
+      }
+      
+      // Update monthly expense and balance
+      monthlyRecord.expense += parsedInitialAmount;
+      monthlyRecord.balance = monthlyRecord.income - monthlyRecord.expense;
+      
+      await user.save();
+    }
+    
+    req.flash('success', 'Goal created successfully');
+    res.redirect('/goals');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error creating goal: ' + err.message);
+    res.redirect('/goals/add');
+  }
+});
+
+app.post('/goals/:id/contribute', ensureAuthenticated, async (req, res) => {
+  try {
+    const { amount, description, date } = req.body;
+    const parsedAmount = parseFloat(amount);
+    const contributionDate = date ? new Date(date) : new Date();
+    
+    // Find the goal
+    const goal = await Goal.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    });
+    
+    if (!goal) {
+      req.flash('error', 'Goal not found');
+      return res.redirect('/goals');
+    }
+    
+    // Create a transaction for this contribution
+    const transaction = new Transaction({
+      user: req.user.id,
+      type: 'expense', // It's an expense because money is being allocated from available funds
+      amount: parsedAmount,
+      category: 'Goal Contribution',
+      description: `Contribution to ${goal.name}: ${description || ''}`,
+      date: contributionDate
+    });
+    
+    await transaction.save();
+    
+    // Update goal amount and link transaction
+    goal.currentAmount += parsedAmount;
+    goal.linkedTransactions.push(transaction._id);
+    
+    // Check if goal is completed
+    if (goal.currentAmount >= goal.targetAmount) {
+      goal.isCompleted = true;
+      req.flash('success', 'Congratulations! You have completed your goal!');
+    }
+    
+    await goal.save();
+    
+    // Update user's financial summary
+    const user = await User.findById(req.user.id);
+    
+    // Update overall totals
+    user.financialSummary.totalExpense += parsedAmount;
+    user.financialSummary.balance = user.financialSummary.totalIncome - user.financialSummary.totalExpense;
+    
+    // Update monthly record
+    const year = contributionDate.getFullYear();
+    const month = contributionDate.getMonth();
+    
+    // Find or create monthly record
+    let monthlyRecord = user.financialSummary.monthly.find(
+      record => record.year === year && record.month === month
+    );
+    
+    if (!monthlyRecord) {
+      monthlyRecord = {
+        year,
+        month,
+        income: 0,
+        expense: 0,
+        balance: 0
+      };
+      user.financialSummary.monthly.push(monthlyRecord);
+      monthlyRecord = user.financialSummary.monthly[user.financialSummary.monthly.length - 1];
+    }
+    
+    // Update monthly expense and balance
+    monthlyRecord.expense += parsedAmount;
+    monthlyRecord.balance = monthlyRecord.income - monthlyRecord.expense;
+    
+    await user.save();
+    
+    req.flash('success', 'Contribution added successfully');
+    res.redirect(`/goals/${goal._id}`);
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error adding contribution: ' + err.message);
+    res.redirect(`/goals/${req.params.id}`);
+  }
+});
+
+app.get('/goals/:id', ensureAuthenticated, async (req, res) => {
+  try {
+    // Find the goal and populate linked transactions
+    const goal = await Goal.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    }).populate('linkedTransactions');
+    
+    if (!goal) {
+      req.flash('error', 'Goal not found');
+      return res.redirect('/goals');
+    }
+    
+    // Calculate goal metrics
+    const today = new Date();
+    const goalObj = goal.toObject();
+    
+    // Calculate progress percentage
+    goalObj.progressPercentage = Math.min(100, (goal.currentAmount / goal.targetAmount) * 100);
+    
+    // Calculate if goal is on track
+    const totalDuration = goal.targetDate - goal.startDate;
+    const elapsedDuration = today - goal.startDate;
+    const expectedProgress = (elapsedDuration / totalDuration) * goal.targetAmount;
+    goalObj.isOnTrack = goal.isCompleted || goal.currentAmount >= expectedProgress;
+    
+    // Calculate days remaining
+    const diffTime = goal.targetDate - today;
+    goalObj.daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    res.render('goal-detail', {
+      title: goal.name,
+      goal: goalObj
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error fetching goal: ' + err.message);
+    res.redirect('/goals');
+  }
+});
+
+// Get the edit goal page
+app.get('/goals/:id/edit', ensureAuthenticated, async (req, res) => {
+  try {
+    const goal = await Goal.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    }).populate('linkedTransactions');
+    
+    if (!goal) {
+      req.flash('error', 'Goal not found');
+      console.log("not found")
+      return res.redirect('/goals');
+    }
+    
+    res.render('edit-goal', {
+      title: `Edit ${goal.name}`,
+      goal
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error fetching goal: ' + err.message);
+    // res.redirect('/goals');
+  }
+});
+
+// Process the edit goal form
+app.post('/goals/:id/edit', ensureAuthenticated, async (req, res) => {
+  try {
+    const { name, description, category, targetAmount, currentAmount, targetDate, priority, isCompleted } = req.body;
+    
+    // Find the goal
+    const goal = await Goal.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    });
+    
+    if (!goal) {
+      req.flash('error', 'Goal not found');
+      return res.redirect('/goals');
+    }
+    
+    // Update goal fields
+    goal.name = name;
+    goal.description = description;
+    goal.category = category;
+    goal.targetAmount = parseFloat(targetAmount);
+    goal.targetDate = new Date(targetDate);
+    goal.priority = priority;
+    goal.isCompleted = isCompleted === 'on';
+    
+    // Only update currentAmount if there are no linked transactions
+    // This prevents inconsistencies with contribution history
+    
+    
+    await goal.save();
+    
+    req.flash('success', 'Goal updated successfully');
+    res.redirect(`/goals/${goal._id}`);
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error updating goal: ' + err.message);
+    res.redirect(`/goals/${req.params.id}/edit`);
+  }
+});
+
+app.post('/goals/:id/delete', ensureAuthenticated, async (req, res) => {
+  try {
+    // Find the goal
+    const goal = await Goal.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    });
+    
+    if (!goal) {
+      req.flash('error', 'Goal not found');
+      return res.redirect('/goals');
+    }
+    
+    // If the goal has linked transactions, update their descriptions
+    // but don't delete them
+    if (goal.linkedTransactions && goal.linkedTransactions.length > 0) {
+      for (const transactionId of goal.linkedTransactions) {
+        const transaction = await Transaction.findById(transactionId);
+        if (transaction) {
+          transaction.description = `${transaction.description} (from deleted goal: ${goal.name})`;
+          await transaction.save();
+        }
+      }
+    }
+    
+    // Delete the goal
+    await Goal.findByIdAndDelete(goal._id);
+    
+    req.flash('success', 'Goal deleted successfully. Associated transactions have been preserved.');
+    res.redirect('/goals');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error deleting goal: ' + err.message);
+    res.redirect('/goals');
+  }
+});
+
+
+const Reminder = require('./models/Reminder');
+
+// Get all reminders
+app.get('/reminders', ensureAuthenticated, async (req, res) => {
+  try {
+    // Get reminders sorted by due date
+    const reminders = await Reminder.find({ 
+      user: req.user.id,
+      isPaid: false
+    }).sort({ dueDate: 1 });
+    
+    // Get paid reminders (limited to last 10)
+    const paidReminders = await Reminder.find({
+      user: req.user.id,
+      isPaid: true
+    }).sort({ lastPaidDate: -1 }).limit(10);
+    
+    // Calculate upcoming and overdue reminders
+    const today = new Date();
+    const upcomingReminders = reminders.filter(reminder => {
+      const dueDate = new Date(reminder.dueDate);
+      return dueDate >= today;
+    });
+    
+    const overdueReminders = reminders.filter(reminder => {
+      const dueDate = new Date(reminder.dueDate);
+      return dueDate < today;
+    });
+    
+    // Calculate total upcoming payments
+    const totalUpcoming = upcomingReminders.reduce((sum, reminder) => sum + reminder.amount, 0);
+    const totalOverdue = overdueReminders.reduce((sum, reminder) => sum + reminder.amount, 0);
+    
+    res.render('reminders', {
+      title: 'Bill Reminders',
+      reminders,
+      paidReminders,
+      upcomingReminders,
+      overdueReminders,
+      totalUpcoming,
+      totalOverdue
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error fetching reminders');
+    res.redirect('/dashboard');
+  }
+});
+
+// Add reminder form
+app.get('/reminders/add', ensureAuthenticated, (req, res) => {
+  res.render('add-reminder', {
+    title: 'Add New Reminder'
+  });
+});
+
+// Process add reminder form
+app.post('/reminders/add', ensureAuthenticated, async (req, res) => {
+  try {
+    const { title, amount, category, dueDate, recurringType, reminderDays, notes } = req.body;
+    
+    const newReminder = new Reminder({
+      user: req.user.id,
+      title,
+      amount: parseFloat(amount),
+      category,
+      dueDate: new Date(dueDate),
+      recurringType: recurringType || 'none',
+      reminderDays: parseInt(reminderDays) || 3,
+      notes
+    });
+    
+    // Set the next due date for recurring reminders
+    if (recurringType !== 'none') {
+      newReminder.nextDueDate = calculateNextDueDate(new Date(dueDate), recurringType);
+    }
+    
+    await newReminder.save();
+    
+    req.flash('success', 'Reminder added successfully');
+    res.redirect('/reminders');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error adding reminder: ' + err.message);
+    res.redirect('/reminders/add');
+  }
+});
+
+// Mark reminder as paid
+app.post('/reminders/:id/pay', ensureAuthenticated, async (req, res) => {
+  try {
+    const reminder = await Reminder.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    });
+    
+    if (!reminder) {
+      req.flash('error', 'Reminder not found');
+      return res.redirect('/reminders');
+    }
+    
+    // Create a transaction for this payment
+    const transaction = new Transaction({
+      user: req.user.id,
+      type: 'expense',
+      amount: reminder.amount,
+      category: reminder.category,
+      description: `Payment for: ${reminder.title}`,
+      date: new Date()
+    });
+    
+    await transaction.save();
+    
+    // Update user's financial summary
+    const user = await User.findById(req.user.id);
+    
+    // Update overall totals
+    user.financialSummary.totalExpense += reminder.amount;
+    user.financialSummary.balance = user.financialSummary.totalIncome - user.financialSummary.totalExpense;
+    
+    // Update monthly record
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    
+    // Find or create monthly record
+    let monthlyRecord = user.financialSummary.monthly.find(
+      record => record.year === year && record.month === month
+    );
+    
+    if (!monthlyRecord) {
+      monthlyRecord = {
+        year,
+        month,
+        income: 0,
+        expense: 0,
+        balance: 0
+      };
+      user.financialSummary.monthly.push(monthlyRecord);
+      monthlyRecord = user.financialSummary.monthly[user.financialSummary.monthly.length - 1];
+    }
+    
+    // Update monthly expense and balance
+    monthlyRecord.expense += reminder.amount;
+    monthlyRecord.balance = monthlyRecord.income - monthlyRecord.expense;
+    
+    await user.save();
+    
+    // Handle recurring reminders
+    if (reminder.recurringType !== 'none') {
+      // Create a new reminder for the next due date
+      const nextDueDate = calculateNextDueDate(new Date(reminder.dueDate), reminder.recurringType);
+      
+      const newReminder = new Reminder({
+        user: req.user.id,
+        title: reminder.title,
+        amount: reminder.amount,
+        category: reminder.category,
+        dueDate: nextDueDate,
+        recurringType: reminder.recurringType,
+        reminderDays: reminder.reminderDays,
+        notes: reminder.notes
+      });
+      
+      if (reminder.recurringType !== 'none') {
+        newReminder.nextDueDate = calculateNextDueDate(nextDueDate, reminder.recurringType);
+      }
+      
+      await newReminder.save();
+    }
+    
+    // Mark the current reminder as paid
+    reminder.isPaid = true;
+    reminder.lastPaidDate = new Date();
+    await reminder.save();
+    
+    req.flash('success', 'Payment recorded successfully');
+    res.redirect('/reminders');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error recording payment: ' + err.message);
+    res.redirect('/reminders');
+  }
+});
+
+// Delete reminder
+app.post('/reminders/:id/delete', ensureAuthenticated, async (req, res) => {
+  try {
+    await Reminder.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user.id
+    });
+    
+    req.flash('success', 'Reminder deleted successfully');
+    res.redirect('/reminders');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error deleting reminder');
+    res.redirect('/reminders');
+  }
+});
+
+// Helper function to calculate next due date for recurring reminders
+function calculateNextDueDate(currentDueDate, recurringType) {
+  const nextDate = new Date(currentDueDate);
+  
+  switch (recurringType) {
+    case 'daily':
+      nextDate.setDate(nextDate.getDate() + 1);
+      break;
+    case 'weekly':
+      nextDate.setDate(nextDate.getDate() + 7);
+      break;
+    case 'monthly':
+      nextDate.setMonth(nextDate.getMonth() + 1);
+      break;
+    case 'yearly':
+      nextDate.setFullYear(nextDate.getFullYear() + 1);
+      break;
+  }
+  
+  return nextDate;
+}
+
+// Import the scheduler
+const { scheduleEmailReminders } = require('./schedulers/emailReminders');
+
+// Start the scheduler when the app starts
+
+  scheduleEmailReminders();
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,0 +1,114 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">Edit Goal: <%= goal.name %></h3>
+          <a href="/goals/<%= goal._id %>" class="btn btn-light btn-sm">Back to Goal</a>
+        </div>
+        <div class="card-body">
+          <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <form action="/goals/<%= goal._id %>/edit" method="POST">
+            <div class="mb-3">
+              <label for="name" class="form-label">Goal Name</label>
+              <input type="text" class="form-control" id="name" name="name" value="<%= goal.name %>" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="description" class="form-label">Description (Optional)</label>
+              <textarea class="form-control" id="description" name="description" rows="3"><%= goal.description || '' %></textarea>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="category" class="form-label">Category</label>
+                <select class="form-select" id="category" name="category" required>
+                  <option value="Emergency Fund" <%= goal.category === 'Emergency Fund' ? 'selected' : '' %>>Emergency Fund</option>
+                  <option value="Savings" <%= goal.category === 'Savings' ? 'selected' : '' %>>Savings</option>
+                  <option value="Debt Repayment" <%= goal.category === 'Debt Repayment' ? 'selected' : '' %>>Debt Repayment</option>
+                  <option value="Purchase" <%= goal.category === 'Purchase' ? 'selected' : '' %>>Major Purchase</option>
+                  <option value="Investment" <%= goal.category === 'Investment' ? 'selected' : '' %>>Investment</option>
+                  <option value="Education" <%= goal.category === 'Education' ? 'selected' : '' %>>Education</option>
+                  <option value="Travel" <%= goal.category === 'Travel' ? 'selected' : '' %>>Travel</option>
+                  <option value="Other" <%= goal.category === 'Other' ? 'selected' : '' %>>Other</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="priority" class="form-label">Priority</label>
+                <select class="form-select" id="priority" name="priority" required>
+                  <option value="High" <%= goal.priority === 'High' ? 'selected' : '' %>>High</option>
+                  <option value="Medium" <%= goal.priority === 'Medium' ? 'selected' : '' %>>Medium</option>
+                  <option value="Low" <%= goal.priority === 'Low' ? 'selected' : '' %>>Low</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="targetAmount" class="form-label">Target Amount</label>
+                <div class="input-group">
+                  <span class="input-group-text">₹</span>
+                  <input type="number" step="0.01" min="<%= goal.currentAmount %>" class="form-control" id="targetAmount" name="targetAmount" value="<%= goal.targetAmount %>" required>
+                </div>
+                <div class="form-text">Must be at least equal to current amount (₹<%= goal.currentAmount.toFixed(2) %>)</div>
+              </div>
+              <div class="col-md-6">
+                <label for="currentAmount" class="form-label">Current Amount</label>
+                <div class="input-group">
+                  <span class="input-group-text">₹</span>
+                  <input type="number" step="0.01" min="0" class="form-control" id="currentAmount" name="currentAmount" value="<%= goal.currentAmount %>" <%= goal.linkedTransactions && goal.linkedTransactions.length > 0 ? 'readonly' : '' %>>
+                </div>
+                <% if (goal.linkedTransactions && goal.linkedTransactions.length > 0) { %>
+                  <div class="form-text text-warning">Cannot edit directly. Use contributions to adjust amount.</div>
+                <% } %>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="targetDate" class="form-label">Target Date</label>
+              <input type="date" class="form-control" id="targetDate" name="targetDate" value="<%= goal.targetDate.toISOString().split('T')[0] %>" required>
+            </div>
+            
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="isCompleted" name="isCompleted" <%= goal.isCompleted ? 'checked' : '' %>>
+                <label class="form-check-label" for="isCompleted">
+                  Mark as Completed
+                </label>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Update Goal</button>
+              <a href="/goals/<%= goal._id %>" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const targetDateInput = document.getElementById('targetDate');
+    
+    // Set minimum date to today if not completed
+    <% if (!goal.isCompleted) { %>
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      targetDateInput.min = `${yyyy}-${mm}-${dd}`;
+    <% } %>
+  });
+</script>
+
+<%- include('partials/footer') %>

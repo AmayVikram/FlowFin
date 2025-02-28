@@ -213,6 +213,168 @@
         </div>
       </div>
     </div>
+    <!-- Goals Summary Section on Dashboard -->
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Financial Goals</h4>
+        <a href="/goals" class="btn btn-light btn-sm">View All Goals</a>
+      </div>
+      <div class="card-body">
+        <% if (goals && goals.length > 0) { %>
+          <div class="row">
+            <% goals.slice(0, 3).forEach(goal => { %>
+              <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><%= goal.name %></h5>
+                    <span class="badge <%= goal.isOnTrack ? 'bg-success' : 'bg-warning' %>">
+                      <%= goal.isOnTrack ? 'On Track' : 'Behind' %>
+                    </span>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">
+                      <strong>Target:</strong> ₹<%= goal.targetAmount.toFixed(2) %><br>
+                      <strong>Progress:</strong> ₹<%= goal.currentAmount.toFixed(2) %><br>
+                      <strong>Deadline:</strong> <%= new Date(goal.targetDate).toLocaleDateString() %><br>
+                      <strong>Days Left:</strong> <%= goal.daysRemaining %>
+                    </p>
+                    <div class="progress mb-3" style="height: 20px;">
+                      <div class="progress-bar <%= goal.isOnTrack ? 'bg-success' : 'bg-warning' %>" 
+                           role="progressbar" 
+                           style="width: <%= goal.progressPercentage %>%;" 
+                           aria-valuenow="<%= goal.progressPercentage %>" 
+                           aria-valuemin="0" 
+                           aria-valuemax="100">
+                        <%= Math.round(goal.progressPercentage) %>%
+                      </div>
+                    </div>
+                    <div class="d-grid">
+                      <a href="/goals/<%= goal._id %>" class="btn btn-outline-primary btn-sm">View Details</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+          <% if (goals.length > 3) { %>
+            <div class="text-center mt-3">
+              <a href="/goals" class="btn btn-outline-primary">View All <%= goals.length %> Goals</a>
+            </div>
+          <% } %>
+        <% } else { %>
+          <div class="text-center py-5">
+            <i class="bi bi-flag fs-1 text-muted"></i>
+            <h5 class="mt-3">No financial goals yet</h5>
+            <p class="text-muted">Set financial goals to track your progress and achieve your dreams.</p>
+            <a href="/goals/add" class="btn btn-primary mt-2">Create Your First Goal</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+    <!-- Bill Reminders Section -->
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card shadow">
+      <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+        <h4 class="mb-0"><i class="bi bi-bell"></i> Upcoming Bill Reminders</h4>
+        <a href="/reminders" class="btn btn-outline-dark btn-sm">View All Reminders</a>
+      </div>
+      <div class="card-body">
+        <% if (typeof upcomingReminders !== 'undefined' && upcomingReminders && upcomingReminders.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Bill</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% upcomingReminders.slice(0, 3).forEach(reminder => { %>
+                  <tr class="<%= reminder.isDueSoon ? 'table-warning' : '' %>">
+                    <td><%= reminder.title %></td>
+                    <td>₹<%= reminder.amount.toFixed(2) %></td>
+                    <td><%= new Date(reminder.dueDate).toLocaleDateString() %></td>
+                    <td>
+                      <% if (reminder.isDueSoon) { %>
+                        <span class="badge bg-warning text-dark">
+                          Due in <%= reminder.daysUntilDue %> days
+                        </span>
+                      <% } else { %>
+                        <span class="badge bg-info">
+                          Due in <%= reminder.daysUntilDue %> days
+                        </span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#dashboardPayModal<%= reminder._id %>">
+                        Pay Now
+                      </button>
+                    </td>
+                  </tr>
+                  
+                  <!-- Payment Modal -->
+                  <div class="modal fade" id="dashboardPayModal<%= reminder._id %>" tabindex="-1" aria-labelledby="dashboardPayModalLabel<%= reminder._id %>" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <form action="/reminders/<%= reminder._id %>/pay" method="POST">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="dashboardPayModalLabel<%= reminder._id %>">Pay <%= reminder.title %></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>You are about to record a payment for:</p>
+                            <ul>
+                              <li><strong>Bill:</strong> <%= reminder.title %></li>
+                              <li><strong>Amount:</strong> ₹<%= reminder.amount.toFixed(2) %></li>
+                              <li><strong>Due Date:</strong> <%= new Date(reminder.dueDate).toLocaleDateString() %></li>
+                            </ul>
+                            <p>This will create an expense transaction and, if recurring, schedule the next reminder.</p>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success">Record Payment</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          
+          <% if (upcomingReminders.length > 3) { %>
+            <div class="text-center mt-3">
+              <a href="/reminders" class="btn btn-outline-primary">View All <%= upcomingReminders.length %> Reminders</a>
+            </div>
+          <% } %>
+        <% } else if (typeof overdueReminders !== 'undefined' && overdueReminders && overdueReminders.length > 0) { %>
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill"></i> You have <strong><%= overdueReminders.length %> overdue bills</strong> totaling <strong>₹<%= totalOverdue.toFixed(2) %></strong>.
+            <a href="/reminders" class="alert-link">View and pay them now</a>.
+          </div>
+        <% } else { %>
+          <div class="text-center py-4">
+            <i class="bi bi-check-circle-fill text-success fs-1"></i>
+            <h5 class="mt-3">No upcoming bills</h5>
+            <p class="text-muted">You're all caught up! No bill reminders due soon.</p>
+            <a href="/reminders/add" class="btn btn-outline-primary mt-2">Add New Reminder</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
   </div>
+</div>
+
+  </div>
+</div>
+
+  
 
   <%- include('partials/footer') %>

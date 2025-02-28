@@ -1,0 +1,536 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">Monthly Financial Reports</h3>
+          <a href="/dashboard" class="btn btn-light btn-sm">Back to Dashboard</a>
+        </div>
+        <div class="card-body">
+          <h5>Financial Overview</h5>
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                  <h5>Total Income</h5>
+                  <h3>₹<%= financialSummary.totalIncome.toFixed(2) %></h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                  <h5>Total Expenses</h5>
+                  <h3>₹<%= financialSummary.totalExpense.toFixed(2) %></h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card <%= financialSummary.balance >= 0 ? 'bg-primary' : 'bg-warning' %> text-white">
+                <div class="card-body text-center">
+                  <h5>Overall Balance</h5>
+                  <h3>₹<%= financialSummary.balance.toFixed(2) %></h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Income vs Expense Comparison -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card shadow h-100">
+        <div class="card-header bg-primary text-white">
+          <h4>Income vs Expense</h4>
+        </div>
+        <div class="card-body">
+          <canvas id="incomeVsExpenseChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow h-100">
+        <div class="card-header bg-danger text-white">
+          <h4>Top Expense Categories</h4>
+        </div>
+        <div class="card-body">
+          <% if (topExpenseCategories && topExpenseCategories.length > 0) { %>
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>% of Total Expenses</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% topExpenseCategories.forEach(item => { %>
+                    <tr>
+                      <td><%= item.category %></td>
+                      <td class="text-danger">₹<%= item.amount.toFixed(2) %></td>
+                      <td>
+                        <div class="progress" style="height: 20px;">
+                          <div class="progress-bar bg-danger" role="progressbar" 
+                               style="width: <%= (item.amount / financialSummary.totalExpense * 100).toFixed(0) %>%;" 
+                               aria-valuenow="<%= (item.amount / financialSummary.totalExpense * 100).toFixed(0) %>" 
+                               aria-valuemin="0" aria-valuemax="100">
+                            <%= (item.amount / financialSummary.totalExpense * 100).toFixed(0) %>%
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="alert alert-info text-center">
+              <i class="bi bi-info-circle"></i> No expense data available yet.
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Transaction Timeline -->
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-header bg-info text-white">
+          <h4>Transaction Timeline</h4>
+        </div>
+        <div class="card-body">
+          <% if (timelineData && JSON.parse(timelineData).dates && JSON.parse(timelineData).dates.length > 0) { %>
+            <canvas id="timelineChart" height="100"></canvas>
+          <% } else { %>
+            <div class="alert alert-info text-center">
+              <i class="bi bi-info-circle"></i> Not enough data to display transaction timeline.
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Monthly Trend Chart -->
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4>Monthly Trends</h4>
+        </div>
+        <div class="card-body">
+          <% if (monthlyLabels && JSON.parse(monthlyLabels).length > 0) { %>
+            <canvas id="monthlyTrendChart" height="100"></canvas>
+          <% } else { %>
+            <div class="alert alert-info text-center">
+              <i class="bi bi-info-circle"></i> Not enough data to display monthly trends. Add transactions for multiple months to see trends.
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Category Distribution Charts -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card shadow h-100">
+        <div class="card-header bg-success text-white">
+          <h4>Income by Category</h4>
+        </div>
+        <div class="card-body">
+          <% if (incomeCategoryLabels && JSON.parse(incomeCategoryLabels).length > 0) { %>
+            <canvas id="incomeCategoryChart"></canvas>
+          <% } else { %>
+            <div class="alert alert-info text-center">
+              <i class="bi bi-info-circle"></i> No income transactions found. Add income transactions to see category distribution.
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow h-100">
+        <div class="card-header bg-danger text-white">
+          <h4>Expenses by Category</h4>
+        </div>
+        <div class="card-body">
+          <% if (expenseCategoryLabels && JSON.parse(expenseCategoryLabels).length > 0) { %>
+            <canvas id="expenseCategoryChart"></canvas>
+          <% } else { %>
+            <div class="alert alert-info text-center">
+              <i class="bi bi-info-circle"></i> No expense transactions found. Add expense transactions to see category distribution.
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Monthly Summary Table -->
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4>Monthly Summary</h4>
+        </div>
+        <div class="card-body">
+          <% if (monthlySummaries && monthlySummaries.length > 0) { %>
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Income</th>
+                    <th>Expenses</th>
+                    <th>Balance</th>
+                    <th>Savings Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% monthlySummaries.forEach(summary => { %>
+                    <tr>
+                      <td><%= summary.displayName %></td>
+                      <td class="text-success">₹<%= (summary.income || 0).toFixed(2) %></td>
+                      <td class="text-danger">₹<%= (summary.expense || 0).toFixed(2) %></td>
+                      <td class="<%= (summary.balance || 0) >= 0 ? 'text-primary' : 'text-warning' %>">
+                        ₹<%= (summary.balance || 0).toFixed(2) %>
+                      </td>
+                      <td>
+                        <% if ((summary.income || 0) > 0) { %>
+                          <%= Math.round(((summary.income || 0) - (summary.expense || 0)) / (summary.income || 1) * 100) %>%
+                        <% } else { %>
+                          N/A
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="alert alert-info text-center">
+              <i class="bi bi-info-circle"></i> No monthly data available yet. Add transactions to see monthly summaries.
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Savings Rate Trend Chart -->
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-header bg-info text-white">
+          <h4>Savings Rate Trend</h4>
+        </div>
+        <div class="card-body">
+          <% if (monthlySummaries && monthlySummaries.length > 1) { %>
+            <canvas id="savingsRateChart" height="80"></canvas>
+          <% } else { %>
+            <div class="alert alert-info text-center">
+              <i class="bi bi-info-circle"></i> Not enough data to display savings rate trend. Add transactions for multiple months to see trends.
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Initialize Charts -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Parse data from server
+    const monthlyLabels = <%- monthlyLabels || '[]' %>;
+    const monthlyIncomeData = <%- monthlyIncomeData || '[]' %>;
+    const monthlyExpenseData = <%- monthlyExpenseData || '[]' %>;
+    const monthlyBalanceData = <%- monthlyBalanceData || '[]' %>;
+    
+    const incomeCategoryLabels = <%- incomeCategoryLabels || '[]' %>;
+    const incomeCategoryData = <%- incomeCategoryData || '[]' %>;
+    
+    const expenseCategoryLabels = <%- expenseCategoryLabels || '[]' %>;
+    const expenseCategoryData = <%- expenseCategoryData || '[]' %>;
+    
+    const timelineData = <%- timelineData || '{"dates":[],"incomeData":[],"expenseData":[]}' %>;
+    const incomeVsExpenseData = <%- incomeVsExpenseData || '{"labels":[],"data":[]}' %>;
+    
+    // Generate random colors for charts
+    function generateColors(count) {
+      const colors = [];
+      for (let i = 0; i < count; i++) {
+        const hue = (i * 137) % 360; // Use golden angle approximation for even distribution
+        colors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+      }
+      return colors;
+    }
+    
+    // Income vs Expense Chart
+    if (incomeVsExpenseData.labels && incomeVsExpenseData.labels.length > 0) {
+      const incomeVsExpenseCtx = document.getElementById('incomeVsExpenseChart').getContext('2d');
+      new Chart(incomeVsExpenseCtx, {
+        type: 'pie',
+        data: {
+          labels: incomeVsExpenseData.labels,
+          datasets: [{
+            data: incomeVsExpenseData.data,
+            backgroundColor: ['rgba(40, 167, 69, 0.7)', 'rgba(220, 53, 69, 0.7)'],
+            borderColor: ['rgba(40, 167, 69, 1)', 'rgba(220, 53, 69, 1)'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ₹${value.toFixed(2)} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Transaction Timeline Chart
+    if (timelineData.dates && timelineData.dates.length > 0) {
+      const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+      new Chart(timelineCtx, {
+        type: 'line',
+        data: {
+          labels: timelineData.dates,
+          datasets: [
+            {
+              label: 'Income',
+              data: timelineData.incomeData,
+              borderColor: 'rgba(40, 167, 69, 1)',
+              backgroundColor: 'rgba(40, 167, 69, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Expenses',
+              data: timelineData.expenseData,
+              borderColor: 'rgba(220, 53, 69, 1)',
+              backgroundColor: 'rgba(220, 53, 69, 0.1)',
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Date'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Amount (₹)'
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Monthly Trend Chart
+    if (monthlyLabels.length > 0) {
+      const trendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+      new Chart(trendCtx, {
+        type: 'bar',
+        data: {
+          labels: monthlyLabels,
+          datasets: [
+            {
+              label: 'Income',
+              data: monthlyIncomeData,
+              backgroundColor: 'rgba(40, 167, 69, 0.7)',
+              borderColor: 'rgba(40, 167, 69, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Expenses',
+              data: monthlyExpenseData,
+              backgroundColor: 'rgba(220, 53, 69, 0.7)',
+              borderColor: 'rgba(220, 53, 69, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Balance',
+              data: monthlyBalanceData,
+              type: 'line',
+              fill: false,
+              borderColor: 'rgba(0, 123, 255, 1)',
+              tension: 0.1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Amount (₹)'
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Income Category Chart
+    if (incomeCategoryLabels.length > 0) {
+      const incomeCtx = document.getElementById('incomeCategoryChart').getContext('2d');
+      new Chart(incomeCtx, {
+        type: 'doughnut',
+        data: {
+          labels: incomeCategoryLabels,
+          datasets: [{
+            data: incomeCategoryData,
+            backgroundColor: generateColors(incomeCategoryLabels.length),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'right',
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ₹${value.toFixed(2)} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Expense Category Chart
+    if (expenseCategoryLabels.length > 0) {
+      const expenseCtx = document.getElementById('expenseCategoryChart').getContext('2d');
+      new Chart(expenseCtx, {
+        type: 'doughnut',
+        data: {
+          labels: expenseCategoryLabels,
+          datasets: [{
+            data: expenseCategoryData,
+            backgroundColor: generateColors(expenseCategoryLabels.length),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'right',
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ₹${value.toFixed(2)} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Savings Rate Chart
+        
+        if (monthlyLabels.length > 1) {
+      // Calculate savings rate for each month
+      const savingsRateData = monthlyLabels.map((_, i) => {
+        if (monthlyIncomeData[i] > 0) {
+          return (monthlyBalanceData[i] / monthlyIncomeData[i]) * 100;
+        }
+        return 0;
+      });
+      
+      const savingsCtx = document.getElementById('savingsRateChart').getContext('2d');
+      new Chart(savingsCtx, {
+        type: 'line',
+        data: {
+          labels: monthlyLabels,
+          datasets: [{
+            label: 'Savings Rate (%)',
+            data: savingsRateData,
+            borderColor: 'rgba(23, 162, 184, 1)',
+            backgroundColor: 'rgba(23, 162, 184, 0.2)',
+            tension: 0.1,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Savings Rate (%)'
+              },
+              suggestedMax: 100
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.dataset.label || '';
+                  const value = context.raw || 0;
+                  return `${label}: ${value.toFixed(1)}%`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>
+

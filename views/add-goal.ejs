@@ -1,0 +1,156 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">Create New Financial Goal</h3>
+          <a href="/goals" class="btn btn-light btn-sm">Back to Goals</a>
+        </div>
+        <div class="card-body">
+          <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <form action="/goals/add" method="POST">
+            <div class="mb-3">
+              <label for="name" class="form-label">Goal Name</label>
+              <input type="text" class="form-control" id="name" name="name" required>
+              <div class="form-text">Give your goal a clear, specific name</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="description" class="form-label">Description (Optional)</label>
+              <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+              <div class="form-text">Describe why this goal is important to you</div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="category" class="form-label">Category</label>
+                <select class="form-select" id="category" name="category" required>
+                  <option value="">Select a category</option>
+                  <option value="Emergency Fund">Emergency Fund</option>
+                  <option value="Savings">Savings</option>
+                  <option value="Debt Repayment">Debt Repayment</option>
+                  <option value="Purchase">Major Purchase</option>
+                  <option value="Investment">Investment</option>
+                  <option value="Education">Education</option>
+                  <option value="Travel">Travel</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="priority" class="form-label">Priority</label>
+                <select class="form-select" id="priority" name="priority" required>
+                  <option value="High">High</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="targetAmount" class="form-label">Target Amount</label>
+                <div class="input-group">
+                  <span class="input-group-text">₹</span>
+                  <input type="number" step="0.01" min="1" class="form-control" id="targetAmount" name="targetAmount" required>
+                </div>
+                <div class="form-text">Total amount you want to save</div>
+              </div>
+              <div class="col-md-6">
+                <label for="initialAmount" class="form-label">Initial Contribution (Optional)</label>
+                <div class="input-group">
+                  <span class="input-group-text">₹</span>
+                  <input type="number" step="0.01" min="0" class="form-control" id="initialAmount" name="initialAmount" value="0">
+                </div>
+                <div class="form-text">Amount you've already saved toward this goal</div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="targetDate" class="form-label">Target Date</label>
+              <input type="date" class="form-control" id="targetDate" name="targetDate" required>
+              <div class="form-text">When do you want to achieve this goal?</div>
+            </div>
+            
+            <div id="goalSummary" class="alert alert-info d-none">
+              <h5>Goal Summary</h5>
+              <div id="summaryContent"></div>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Create Goal</button>
+              <a href="/goals" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const targetAmountInput = document.getElementById('targetAmount');
+    const initialAmountInput = document.getElementById('initialAmount');
+    const targetDateInput = document.getElementById('targetDate');
+    const goalSummary = document.getElementById('goalSummary');
+    const summaryContent = document.getElementById('summaryContent');
+    
+    // Set minimum date to today
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    targetDateInput.min = `${yyyy}-${mm}-${dd}`;
+    
+    // Update summary when inputs change
+    function updateSummary() {
+      const targetAmount = parseFloat(targetAmountInput.value) || 0;
+      const initialAmount = parseFloat(initialAmountInput.value) || 0;
+      const targetDate = new Date(targetDateInput.value);
+      
+      if (targetAmount > 0 && !isNaN(targetDate.getTime())) {
+        const today = new Date();
+        const daysRemaining = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+        const amountNeeded = targetAmount - initialAmount;
+        
+        if (daysRemaining > 0) {
+          const weeksRemaining = Math.ceil(daysRemaining / 7);
+          const monthsRemaining = Math.ceil(daysRemaining / 30);
+          
+          const dailySavings = amountNeeded / daysRemaining;
+          const weeklySavings = amountNeeded / weeksRemaining;
+          const monthlySavings = amountNeeded / monthsRemaining;
+          
+          let html = `
+            <p>You need to save <strong>₹${amountNeeded.toFixed(2)}</strong> in <strong>${daysRemaining}</strong> days.</p>
+            <ul>
+              <li>Daily savings needed: <strong>₹${dailySavings.toFixed(2)}</strong></li>
+              <li>Weekly savings needed: <strong>₹${weeklySavings.toFixed(2)}</strong></li>
+              <li>Monthly savings needed: <strong>₹${monthlySavings.toFixed(2)}</strong></li>
+            </ul>
+          `;
+          
+          summaryContent.innerHTML = html;
+          goalSummary.classList.remove('d-none');
+        } else {
+          goalSummary.classList.add('d-none');
+        }
+      } else {
+        goalSummary.classList.add('d-none');
+      }
+    }
+    
+    targetAmountInput.addEventListener('input', updateSummary);
+    initialAmountInput.addEventListener('input', updateSummary);
+    targetDateInput.addEventListener('change', updateSummary);
+  });
+</script>
+
+<%- include('partials/footer') %>
