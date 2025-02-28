@@ -1453,6 +1453,71 @@ app.post('/reminders/:id/delete', ensureAuthenticated, async (req, res) => {
   }
 });
 
+app.get('/reminders/:id/edit', ensureAuthenticated, async (req, res) => {
+  try {
+    const reminder = await Reminder.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    });
+    
+    if (!reminder) {
+      req.flash('error', 'Reminder not found');
+      return res.redirect('/reminders');
+    }
+    
+    res.render('edit-reminder', {
+      title: `Edit ${reminder.title}`,
+      reminder
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error fetching reminder: ' + err.message);
+    res.redirect('/reminders');
+  }
+});
+
+// Process the edit reminder form
+app.post('/reminders/:id/edit', ensureAuthenticated, async (req, res) => {
+  try {
+    const { title, amount, category, dueDate, recurringType, reminderDays, notes, isPaid } = req.body;
+    
+    // Find the reminder
+    const reminder = await Reminder.findOne({
+      _id: req.params.id,
+      user: req.user.id
+    });
+    
+    if (!reminder) {
+      req.flash('error', 'Reminder not found');
+      return res.redirect('/reminders');
+    }
+    
+    // Update reminder fields
+    reminder.title = title;
+    reminder.amount = parseFloat(amount);
+    reminder.category = category;
+    reminder.dueDate = new Date(dueDate);
+    reminder.recurringType = recurringType;
+    reminder.reminderDays = parseInt(reminderDays);
+    reminder.notes = notes;
+    reminder.isPaid = isPaid === 'on';
+    
+    // If marked as paid now, set the last paid date
+    if (reminder.isPaid && !reminder.lastPaidDate) {
+      reminder.lastPaidDate = new Date();
+    }
+    
+    await reminder.save();
+    
+    req.flash('success', 'Reminder updated successfully');
+    res.redirect('/reminders');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error updating reminder: ' + err.message);
+    res.redirect(`/reminders/${req.params.id}/edit`);
+  }
+});
+
 // Helper function to calculate next due date for recurring reminders
 function calculateNextDueDate(currentDueDate, recurringType) {
   const nextDate = new Date(currentDueDate);
