@@ -2,7 +2,7 @@
   <div class="container"> <!-- Welcome Card -->
     <div class="row mb-4">
       <div class="col-md-12">
-        <div class="card shadow">
+        <div class="card-welcome shadow">
           <div class="card-header bg-primary text-white">
             <h3>Welcome to your Dashboard</h3>
           </div>
@@ -25,7 +25,7 @@
     </div> <!-- Financial Overview Section -->
     <div class="row mb-4">
       <div class="col-md-12">
-        <div class="card shadow">
+        <div class="card-overview shadow">
           <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h4 class="mb-0">Financial Overview</h4> <span class="badge bg-light text-dark">Last Updated: <%= new
                 Date().toLocaleDateString() %></span>
@@ -53,23 +53,17 @@
               </div>
               <div class="col-md-4 mb-3">
                 <div class="card <%= financialSummary.balance >= 0 ? 'bg-primary' : 'bg-warning' %> text-white">
-                  <div class="card-body text-center"> <i class="bi bi-bank fs-1 mb-2"></i>
+                  <div class="card-body text-center">
+                    <i class="bi bi-bank fs-1 mb-2"></i>
                     <h5>Overall Balance</h5>
-                    <h3>₹<%= financialSummary.balance.toFixed(2) %>
-                    </h3>
-                    <% if (financialSummary.balance>= 0) { %> <div class="progress mt-2" style="height: 8px;">
-                        <div class="progress-bar bg-light" role="progressbar"
-                          style="width: <%= Math.min(100, (financialSummary.balance / financialSummary.totalIncome) * 100) %>%">
-                        </div>
-                      </div>
-                      <% } else { %>
-                        <div class="progress mt-2" style="height: 8px;">
-                          <div class="progress-bar bg-light" role="progressbar" style="width: 100%"></div>
-                        </div> <small class="mt-1"><i class="bi bi-exclamation-triangle"></i> Negative balance</small>
-                        <% } %>
+                    <h3>₹<%= financialSummary.balance.toFixed(2) %></h3>
+                    <% if (financialSummary.balance < 0) { %>
+                      <small class="mt-1"><i class="bi bi-exclamation-triangle"></i> Negative balance</small>
+                    <% } %>
                   </div>
                 </div>
               </div>
+              
             </div>
 
             
@@ -105,22 +99,14 @@
                   <div class="card-body text-center">
                     <i class="bi bi-wallet2 fs-1 mb-2"></i>
                     <h5>Monthly Balance</h5>
-                    <h3>₹<%= currentMonthSummary.balance.toFixed(2) %>
-                    </h3>
-                    <% if (currentMonthSummary.income> 0) { %>
-                      <div class="progress mt-2" style="height: 8px;">
-                        <div class="progress-bar bg-light" role="progressbar"
-                          style="width: <%= Math.min(100, Math.max(0, (currentMonthSummary.balance / currentMonthSummary.income) * 100)) %>%">
-                        </div>
-                      </div>
-                      <% } %>
-                        <% if (currentMonthSummary.balance < 0) { %>
-                          <small class="mt-1"><i class="bi bi-exclamation-triangle"></i> You're spending more than you
-                            earn!</small>
-                          <% } %>
+                    <h3>₹<%= currentMonthSummary.balance.toFixed(2) %></h3>
+                    <% if (currentMonthSummary.balance < 0) { %>
+                      <small class="mt-1"><i class="bi bi-exclamation-triangle"></i> You're spending more than you earn!</small>
+                    <% } %>
                   </div>
                 </div>
               </div>
+              
             </div>
           </div>
         </div>
@@ -129,7 +115,7 @@
     </div> <!-- Recent Transactions Section -->
     <div class="row mb-4">
       <div class="col-md-12">
-        <div class="card shadow">
+        <div class="card-recent shadow">
           <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
             <h4 class="mb-0">Recent Transactions</h4> <a href="/transactions" class="btn btn-light btn-sm">View All</a>
           </div>
@@ -181,13 +167,13 @@
     </div> <!-- Financial Management Section -->
     <div class="row mb-4">
       <div class="col-md-12">
-        <div class="card shadow">
+        <div class="card-quick shadow">
           <div class="card-header bg-primary text-white">
             <h4>Quick Actions</h4>
           </div>
           <div class="card-body">
             <div class="row">
-              <div class="col-md-6 mb-3">
+              <div class="col md-6 mb-3">
                 <div class="card h-100">
                   <div class="card-body text-center"> <i class="bi bi-plus-circle fs-1 text-success mb-3"></i>
                     <h5>Add Transaction</h5>

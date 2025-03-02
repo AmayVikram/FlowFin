@@ -1,0 +1,651 @@
+body {
+  background-color: #A8E0D7;
+  font-family: 'Arial', sans-serif;
+}
+/* Animated background elements */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23055361' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: -1;
+}
+
+.card-login {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
+  background-color: #ffff;
+  max-width: 550px; /* Set a max-width for better responsiveness */
+  max-height: 550px;
+  margin-left:auto;
+  margin-right: auto;
+  margin-top:25px;
+  margin-bottom: 25px;
+  border-radius: 10px;
+  overflow: auto;
+}
+.card-header {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  text-align: center;
+  padding: 5px;
+  background-color:#5dd7c3;
+}
+
+.card-title {
+  font-family: Roboto;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.card-body {
+  padding: 20px; /* Slightly reduced padding */
+}
+
+.form-label {
+  border-radius: 5px;
+  padding: 2px;
+  font-size: 1.0rem;
+  font-family: Roboto;
+}
+
+.btn-primary {
+  background-color:#5dd7c3;
+  border: none;
+  padding: 8px;
+  font-size: 1.1rem;
+}
+
+.btn-primary:hover {
+  background-color:#055361 ;
+}
+
+.alert {
+  font-size: 0.85rem;
+}
+
+.text-center a {
+  color: #055361;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.text-center a:hover {
+  text-decoration: underline;
+}
+
+.card-footer {
+  background-color: #ffffff;
+  padding: 5px; /* Reduced footer padding */
+  font-size: 0.85rem;
+}
+
+.btn-outline-danger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 1.0rem;
+}
+.card-signup{
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
+  background-color: #ffff;
+  max-width: 750px; /* Set a max-width for better responsiveness */
+  max-height: 600px;
+  margin-left:auto;
+  margin-right: auto;
+  margin-bottom: 5px;
+  margin-top: 10px;
+  border-radius: 10px;
+  overflow:auto;
+}
+.nav-heading{
+  font-family: Lora;
+  font-size:1.8rem;
+  color:#ffffff;
+}
+.navbar-custom{
+  background-color: #055361;
+}
+.nav-item{
+  font-family: Poppins;
+  font-size: 1.1rem;;
+}
+.footer-custom{
+  background-color: #055361;
+}
+.footer-text{
+  text-align: center;
+  font-family: Poppins;
+  font-size: 1.1rem;;
+}
+.agree{
+  padding: 4px;
+}
+/* Custom Dashboard Styling */
+
+/* Main Theme Colors */
+:root {
+  --primary-bg: #A8E0D7;
+  --header-bg: #5dd7c3;
+  --hover-color: #055361;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --light-text: #ffffff;
+  --dark-text: #343a40;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Body and Container Styling */
+body {
+  background-color: var(--primary-bg);
+  font-family: 'Roboto', sans-serif;
+  padding-top: 20px;
+  color: #333;
+}
+
+.container {
+  max-width: 1200px;
+  padding: 0 15px;
+}
+
+/* Card Styling */
+.card {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+}
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: translateY(20px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+.card-reminder{
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+}
+.card-overdue{
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+}
+.card-upcoming{
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+}
+.card-success{
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+}
+.card-overdue1{
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+}
+.card-upcoming1{
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+}
+.card-success1{
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+}
+.card-welcome{
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+}
+.card-overview{
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+}
+.card-recent{
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+}
+.card-quick{
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+}
+.card-goal{
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+}
+.card-header {
+  border-top-left-radius: 10px !important;
+  border-top-right-radius: 10px !important;
+  padding: 15px 20px;
+}
+
+/* Header Colors - Replace Bootstrap's primary with our theme color */
+.bg-primary {
+  background-color: var(--header-bg) !important;
+}
+
+.card-header.bg-primary {
+  border-bottom: 3px solid var(--hover-color);
+}
+
+.card-header.bg-success {
+  border-bottom: 3px solid #1e7e34;
+}
+
+/* Fix for Reminder Section Header - Change from yellow to theme color */
+.card-header.bg-warning {
+  background-color: var(--header-bg) !important;
+  border-bottom: 3px solid var(--hover-color);
+  color: var(--light-text) !important;
+}
+
+.card-header.bg-danger {
+  border-bottom: 3px solid #bd2130;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* Increased padding for reminders section */
+.card-header + .card-body {
+  padding: 25px;
+}
+
+/* Button Styling */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-lg {
+  padding: 12px 20px;
+  font-size: 1.1rem;
+}
+
+/* Fix for Add Transaction button and other primary buttons */
+.btn-primary, .btn-success, a.btn-success {
+  background-color: var(--header-bg);
+  border-color: var(--header-bg);
+}
+
+.btn-primary:hover, .btn-outline-primary:hover,
+.btn-success:hover, .btn-outline-success:hover,
+a.btn-success:hover, a.btn-primary:hover {
+  background-color: var(--hover-color) !important;
+  border-color: var(--hover-color) !important;
+  color: white !important;
+}
+
+.btn-outline-primary {
+  color: var(--header-bg);
+  border-color: var(--header-bg);
+}
+
+/* Fix for Monthly Reports button */
+.btn-outline-info, .btn-info {
+  color: var(--dark-text);
+  border-color: var(--header-bg);
+  background-color: transparent;
+}
+
+.btn-outline-info:hover, .btn-info:hover {
+  background-color: var(--hover-color) !important;
+  border-color: var(--hover-color) !important;
+  color: white !important;
+}
+
+.btn-danger:hover, .btn-outline-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+/* Reminders section button fixes */
+.card-header.bg-warning + .card-body .btn-outline-primary,
+.card-header.bg-warning + .card-body .btn-sm {
+  margin-top: 10px;
+  padding: 6px 14px;
+}
+
+.card-header.bg-warning + .card-body .btn-success.btn-sm {
+  background-color: var(--header-bg);
+  border-color: var(--header-bg);
+}
+
+.card-header.bg-warning + .card-body .btn-success.btn-sm:hover {
+  background-color: var(--hover-color) !important;
+  border-color: var(--hover-color) !important;
+}
+
+/* Update badge colors in reminders section */
+.card-header.bg-warning + .card-body .badge.bg-warning {
+  background-color: var(--header-bg) !important;
+  color: white !important;
+}
+
+.card-header.bg-warning + .card-body .badge.bg-info {
+  background-color: var(--hover-color) !important;
+  color: white;
+}
+
+/* Reminder table row spacing */
+.card-header.bg-warning + .card-body .table td {
+  padding: 15px 12px;
+}
+
+/* Icons Styling */
+.bi {
+  margin-right: 5px;
+}
+
+.card-body .bi.fs-1 {
+  font-size: 2.5rem !important;
+  margin-bottom: 15px;
+}
+
+/* Financial Summary Cards */
+.card-body .card {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card-body .card .card-body {
+  padding: 15px;
+}
+
+/* Progress Bar Enhancements */
+.progress {
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 15px;
+}
+
+.progress-bar {
+  border-radius: 10px;
+  transition: width 1s ease;
+}
+
+/* Table Styling */
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background-color: rgba(93, 215, 195, 0.1);
+  border-bottom: 2px solid var(--header-bg);
+  padding: 12px;
+  font-weight: 600;
+}
+
+.table tbody td {
+  padding: 12px;
+  vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(93, 215, 195, 0.05);
+}
+
+/* Badge Styling */
+.badge {
+  padding: 6px 10px;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+/* Financial Goals Section */
+.card-header .badge {
+  font-size: 0.8rem;
+  padding: 5px 8px;
+}
+
+/* Empty State Styling */
+.text-center.py-5, .text-center.py-4 {
+  padding: 30px 0;
+}
+
+.text-center.py-5 .bi, .text-center.py-4 .bi {
+  font-size: 3rem;
+  opacity: 0.7;
+  margin-bottom: 15px;
+}
+
+
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .card-header h3, .card-header h4 {
+    font-size: 1.2rem;
+  }
+  
+  .card-body h3 {
+    font-size: 1.5rem;
+  }
+  
+  .btn-lg {
+    padding: 8px 12px;
+    font-size: 1rem;
+  }
+  
+  .card-body .bi.fs-1 {
+    font-size: 2rem !important;
+  }
+}
+
+/* Quick Actions Icons */
+.quick-actions .bi.fs-1 {
+  font-size: 3rem !important;
+  color: var(--header-bg);
+  transition: transform 0.3s;
+}
+
+.quick-actions .card:hover .bi.fs-1 {
+  transform: scale(1.1);
+  color: var(--hover-color);
+}
+
+/* Fix for Add Income/Add Expense buttons */
+.d-grid .btn-outline-success:hover, 
+.d-grid .btn-outline-danger:hover {
+  background-color: var(--hover-color) !important;
+  border-color: var(--hover-color) !important;
+  color: white !important;
+}
+
+/* Alert Styling */
+.alert {
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.text-center.py-5 .btn, .text-center.py-4 .btn {
+  animation: pulse 2s infinite;
+}
+
+
+/* Date Badge in Financial Overview */
+.card-header .badge.bg-light {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  color: var(--hover-color) !important;
+  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 20px;
+}
+/* Only target table-responsive in the reminders section */
+.container .card .table-responsive {
+  overflow-x: visible;
+  min-height: 0.01%; /* Minimal height to prevent unnecessary scrollbars */
+}
+
+/* More specific selector for responsive tables */
+.container .card .table-responsive:not(.force-scroll) {
+  overflow-x: auto;
+}
+
+@media screen and (max-width: 767px) {
+  .container .card .table-responsive {
+    overflow-x: auto;
+    border: 0;
+  }
+}
+/* Target only the summary cards in the reminders page */
+.container .row.mb-4 .card {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* Only target buttons within the reminders cards */
+.container .card .btn-light, 
+.container .card .btn-success, 
+.container .card .btn-secondary {
+  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+  font-weight: 500;
+}
+
+/* Only adjust button groups in the reminders section */
+.container .card .btn-group-sm > .btn {
+  padding: 0.25rem 0.5rem;
+}
+
+/* Target only the reminders card headers */
+.container .card > .card-header {
+  padding: 0.75rem 1.25rem;
+}
+
+/* Ensure tables in reminders have consistent styling */
+.container .card .table {
+  margin-bottom: 0;
+}
+
+/* Style badges only in the reminders cards */
+.container .card .badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+
+/* Add shadows only to cards in the reminders container */
+.container > .row > .col-md-12 > .card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  margin-bottom: 1rem;
+}
+
+/* Target dropdowns only in the reminders section */
+.container .card .dropdown-menu {
+  min-width: 10rem;
+  z-index: 1000;
+}
+/* Modal Styling */
+.modal-content {
+  border-radius: 10px;
+  border: none;
+}
+
+.modal-header {
+  background-color: var(--header-bg);
+  color: white;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding: 15px 20px;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #e9ecef;
+}

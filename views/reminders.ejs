@@ -3,7 +3,7 @@
 <div class="container">
   <div class="row mb-4">
     <div class="col-md-12">
-      <div class="card shadow">
+      <div class="card-reminder shadow">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h3 class="mb-0">Bill Reminders</h3>
           <a href="/reminders/add" class="btn btn-light">Add New Reminder</a>
@@ -24,7 +24,7 @@
           <!-- Reminders Summary -->
           <div class="row mb-4">
             <div class="col-md-4">
-              <div class="card bg-danger text-white">
+              <div class="card-overdue bg-danger text-white">
                 <div class="card-body text-center">
                   <h5>Overdue Bills</h5>
                   <h3><%= overdueReminders.length %></h3>
@@ -33,7 +33,7 @@
               </div>
             </div>
             <div class="col-md-4">
-              <div class="card bg-info text-white">
+              <div class="card-upcoming bg-info text-white">
                 <div class="card-body text-center">
                   <h5>Upcoming Bills</h5>
                   <h3><%= upcomingReminders.length %></h3>
@@ -42,7 +42,7 @@
               </div>
             </div>
             <div class="col-md-4">
-              <div class="card bg-success text-white">
+              <div class="card-success bg-success text-white">
                 <div class="card-body text-center">
                   <h5>Recently Paid</h5>
                   <h3><%= paidReminders.length %></h3>
@@ -53,7 +53,7 @@
           
           <!-- Overdue Reminders -->
           <% if (overdueReminders.length > 0) { %>
-            <div class="card mb-4 border-danger">
+            <div class="card-overdue1 mb-4 border-danger">
               <div class="card-header bg-danger text-white">
                 <h5 class="mb-0">Overdue Bills</h5>
               </div>
@@ -138,7 +138,7 @@
           
           <!-- Upcoming Reminders -->
           <% if (upcomingReminders.length > 0) { %>
-            <div class="card mb-4">
+            <div class="card-upcoming1 mb-4">
               <div class="card-header bg-info text-white">
                 <h5 class="mb-0">Upcoming Bills</h5>
               </div>
@@ -229,7 +229,7 @@
           
           <!-- Recently Paid Reminders -->
           <% if (paidReminders.length > 0) { %>
-            <div class="card mb-4">
+            <div class="card-success1 mb-4">
               <div class="card-header bg-success text-white">
                 <h5 class="mb-0">Recently Paid Bills</h5>
               </div>
