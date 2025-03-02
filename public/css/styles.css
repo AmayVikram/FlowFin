@@ -654,3 +654,80 @@ header{
   top: 0;
   z-index: 10;
 }
+/* Custom styles for the transactions page */
+
+/* Card header styling */
+.card-transactions{
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
+}
+.card-transactions .card-header {
+  display: flex;
+  justify-content: center !important;
+  align-items: center;
+  padding: 1rem;
+}
+
+.card-transactions .card-header h3 {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.6rem;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+/* Move buttons below cards */
+.transaction-actions {
+
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Make edit and delete buttons the same size */
+.action-buttons .btn {
+  width: 70px;
+  text-align: center;
+}
+
+
+/* Improved styling for the cards */
+.card-income,
+.card-expense,
+.card-balance {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
+  border-radius: 10px;
+  border: none;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+}
+
+/* Additional responsive adjustments */
+@media (max-width: 768px) {
+  .transaction-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .transaction-actions .btn,
+  .transaction-actions .dropdown {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
+/* Adding more margins in dashboard*/
+.card-title-all{
+  padding: 7px;
+  font-family: Roboto;
+  font-size: 1.5rem;
+}
+.card-title-monthly{
+  padding: 7px;
+  font-family: Roboto;
+  font-size: 1.5 rem;
+}
