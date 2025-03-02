@@ -148,7 +148,6 @@ body::before {
 body {
   background-color: var(--primary-bg);
   font-family: 'Roboto', sans-serif;
-  padding-top: 20px;
   color: #333;
 }
 
@@ -648,4 +647,10 @@ a.btn-success:hover, a.btn-primary:hover {
 .modal-footer {
   padding: 15px 20px;
   border-top: 1px solid #e9ecef;
+}
+
+header{
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
