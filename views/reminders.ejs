@@ -8,7 +8,7 @@
           <h3 class="mb-0">Bill Reminders</h3>
           <a href="/reminders/add" class="btn btn-light">Add New Reminder</a>
         </div>
-        <div class="card-body">
+        <div class="card-body bg-white">
           <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
             <div class="alert alert-success" role="alert">
               <%= success %>
@@ -26,6 +26,7 @@
             <div class="col-md-4">
               <div class="card-overdue bg-danger text-white">
                 <div class="card-body text-center">
+                  <i class="bi bi-exclamation-triangle fs-1 mb-2"></i>
                   <h5>Overdue Bills</h5>
                   <h3><%= overdueReminders.length %></h3>
                 </div>
@@ -34,6 +35,7 @@
             <div class="col-md-4">
               <div class="card-upcoming bg-info text-white">
                 <div class="card-body text-center">
+                  <i class="bi bi-calendar-event fs-1 mb-2"></i>
                   <h5>Upcoming Bills</h5>
                   <h3><%= upcomingReminders.length %></h3>
                 </div>
@@ -42,6 +44,7 @@
             <div class="col-md-4">
               <div class="card-success bg-success text-white">
                 <div class="card-body text-center">
+                  <i class="bi bi-check-circle fs-1 mb-2"></i>
                   <h5>Recently Paid</h5>
                   <h3><%= paidReminders.length %></h3>
                 </div>

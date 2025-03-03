@@ -98,11 +98,11 @@ body::before {
   animation: fadeIn 2s ease-out forwards;
   background-color: #ffff;
   max-width: 750px; /* Set a max-width for better responsiveness */
-  max-height: 600px;
+  max-height: 650px;
   margin-left:auto;
   margin-right: auto;
-  margin-bottom: 5px;
-  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-top: 5px;
   border-radius: 10px;
   overflow:auto;
 }
@@ -732,200 +732,649 @@ header{
   font-size: 1.5 rem;
 }
 
-
-
-
-
-
-
- /* Chat interface styles  */
-.chat-sidebar {
-  background-color: #f8f9fa;
-  border-right: 1px solid #dee2e6;
-  height: calc(100vh - 120px);
-  overflow-y: auto;
-  min-width:400px;
-  
+/* Sidebar Styles - Base styling */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: auto;
+    background-color: #055361;
+    border-radius: 0 10px 10px 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    padding: 10px 0;
 }
 
-.chat-container {
-  height: calc(100vh - 120px);
-  display: flex;
-  flex-direction: column;
-
+.sidebar:hover {
+    width: 180px;
 }
 
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  background-color: #fff;
-  min-height: 300px;
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 15px;
+    color: #fff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    height: 40px;
+    margin: 20px 0;
 }
 
-.conversation-item {
-  padding: 12px;
-  margin-bottom: 8px;
-  background-color: #fff;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid #dee2e6;
+.sidebar-item:last-child {
+    margin-bottom: 0;
 }
 
-.conversation-item:hover {
-  background-color: #e9ecef;
-  transform: translateY(-2px);
+.sidebar-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
 }
 
-.conversation-item.active {
-  background-color: #e3f2fd;
-  border-left: 3px solid #0d6efd;
+.sidebar-item i {
+    font-size: 1.3rem;
+    margin-right: 15px;
+    min-width: 25px;
+    text-align: center;
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.convo-title {
-  font-weight: 500;
-  margin-bottom: 5px;
-  white-space: nowrap;
+.sidebar-item:hover i {
+    transform: scale(1.2);
+}
+
+.sidebar-text {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.sidebar:hover .sidebar-text {
+    opacity: 1;
+}
+
+/* Enhanced mobile responsiveness with further compression */
+@media (max-width: 768px) {
+    /* Make sidebar even narrower on mobile */
+    .sidebar {
+        width: 32px; /* Reduced width */
+        top: 0;
+        transform: none;
+        height: 100%;
+        border-radius: 0;
+        padding: 8px 0; /* Reduced padding */
+    }
+    
+    /* Expand to a smaller width on hover for mobile */
+    .sidebar:hover {
+        width: 150px;
+    }
+    
+    /* Add padding to main container to prevent content overlap */
+    main.container {
+        padding-left: 40px !important; /* Slightly more than sidebar width */
+        margin-left: 0 !important; /* Remove any left margin */
+    }
+    
+    /* Make sidebar items more compact on mobile */
+    .sidebar-item {
+        padding: 6px 8px;
+        height: 30px;
+        margin: 12px 0;
+    }
+    
+    .sidebar-item i {
+        font-size: 1rem;
+        min-width: 20px;
+        margin-right: 10px;
+    }
+    
+    /* Smaller text on mobile */
+    .sidebar-text {
+        font-size: 0.8rem;
+    }
+}
+
+/* Very small screens - even more compression */
+@media (max-width: 480px) {
+    .sidebar {
+        width: 28px; /* Even narrower */
+        padding: 5px 0;
+    }
+    
+    /* Adjust padding for very small screens */
+    main.container {
+        padding-left: 35px !important;
+    }
+    
+    /* Further reduce size of elements */
+    .sidebar-item {
+        padding: 5px 6px;
+        height: 25px;
+        margin: 10px 0;
+    }
+    
+    .sidebar-item i {
+        font-size: 0.9rem;
+        min-width: 18px;
+        margin-right: 8px;
+    }
+    
+    /* Smallest text for very small screens */
+    .sidebar-text {
+        font-size: 0.75rem;
+    }
+}
+
+/* Extra small screens - extreme compression */
+@media (max-width: 360px) {
+    .sidebar {
+        width: 24px;
+        padding: 3px 0;
+    }
+    
+    main.container {
+        padding-left: 30px !important;
+    }
+    
+    .sidebar-item {
+        padding: 4px 5px;
+        height: 22px;
+        margin: 8px 0;
+    }
+    
+    .sidebar-item i {
+        font-size: 0.8rem;
+        min-width: 16px;
+        margin-right: 6px;
+    }
+}/* Sidebar Styles - Base styling */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: auto;
+  background-color: #055361;
+  border-radius: 0 10px 10px 0;
+  transition: all 0.3s ease;
   overflow: hidden;
-  text-overflow: ellipsis;
+  z-index: 1000;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  padding: 10px 0;
 }
 
-.convo-date {
-  font-size: 0.8rem;
-  color: #6c757d;
+.sidebar:hover {
+  width: 180px;
 }
 
-.chat-wrapper .row {
+.sidebar-item {
   display: flex;
-  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 15px;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  height: 40px;
+  margin: 20px 0;
 }
 
-@media (max-width: 767.98px) {
-  .chat-wrapper .row {
-      flex-wrap: wrap;
+.sidebar-item:last-child {
+  margin-bottom: 0;
+}
+
+.sidebar-item:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+.sidebar-item i {
+  font-size: 1.3rem;
+  margin-right: 15px;
+  min-width: 25px;
+  text-align: center;
+  transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-item:hover i {
+  transform: scale(1.2);
+}
+
+.sidebar-text {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.sidebar:hover .sidebar-text {
+  opacity: 1;
+}
+
+/* Maximum compression for mobile views */
+@media (max-width: 768px) {
+  /* Ultra-narrow sidebar */
+  .sidebar {
+      width: 20px; /* Extremely narrow */
+      top: 0;
+      transform: none;
+      height: 50%;
+      border-radius: 0;
+      padding: 5px 0; /* Minimal padding */
+  }
+  
+  /* Expand to a smaller width on hover for mobile */
+  .sidebar:hover {
+      width: 110px;
+  }
+  
+  /* Ensure content doesn't overlap */
+  main.container {
+      padding-left: 30px !important; /* Just enough space */
+      margin-left: 0 !important; /* Remove any left margin */
+      width: calc(100% - 22px) !important; /* Adjust width to account for sidebar */
+  }
+  
+  /* Ultra-compact sidebar items */
+  .sidebar-item {
+      padding: 4px 6px;
+      height: 25px;
+      margin: 10px 0;
+  }
+  
+  .sidebar-item i {
+      font-size: 0.85rem;
+      min-width: 15px;
+      margin-right: 8px;
+  }
+  
+  /* Smaller text */
+  .sidebar-text {
+      font-size: 0.75rem;
   }
 }
 
+/* Small screens - extreme compression */
+@media (max-width: 480px) {
+  .sidebar {
+      width: 20px; /* Minimal width */
+      padding: 3px 0;
+  }
+  
+  main.container {
+      padding-left: 25px !important;
+      width: calc(100% - 20px) !important;
+  }
+  
+  .sidebar-item {
+      padding: 3px 4px;
+      height: 22px;
+      margin: 8px 0;
+  }
+  
+  .sidebar-item i {
+      font-size: 0.8rem;
+      min-width: 14px;
+      margin-right: 6px;
+  }
+}
 
+/* Extra small screens - icon-only mode */
+@media (max-width: 360px) {
+  .sidebar {
+      width: 18px; /* Barely visible */
+      padding: 2px 0;
+  }
+  
+  main.container {
+      padding-left: 22px !important;
+      width: calc(100% - 18px) !important;
+  }
+  
+  .sidebar-item {
+      padding: 2px 3px;
+      height: 20px;
+      margin: 7px 0;
+      justify-content: center; /* Center icons */
+  }
+  
+  .sidebar-item i {
+      font-size: 0.75rem;
+      min-width: 12px;
+      margin-right: 5px;
+  }
+  
+  /* Make sure icons are properly centered in ultra-narrow mode */
+  .sidebar:not(:hover) .sidebar-item {
+      padding-left: 2px;
+      padding-right: 2px;
+  }
+}
+/* Enhanced Chat Interface Styles */
 
+/* Overall chat wrapper */
+.chat-wrapper {
+  max-width: 95%;
+  margin: 0 auto;
+  padding: 20px 0;
+  margin-bottom: 30px; /* Added extra margin at bottom */
+}
 
-/* Message styles */
-.message {
+/* Chat container and layout */
+.chat-row {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fff;
+  margin: 10px; /* Added padding around the outer card */
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
+}
+
+/* Sidebar styling */
+.chat-sidebar {
+  background-color: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+  height: calc(100vh - 150px);
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  padding: 20px 15px;
+}
+
+.chat-sidebar h3 {
+  color: #333;
+  font-size: 1.4rem;
   margin-bottom: 15px;
-  padding: 12px 15px;
+}
+
+#new-chat-btn {
+  border-radius: 30px;
+  font-weight: 500;
+  padding: 10px;
+  transition: all 0.3s ease;
+}
+
+/* Removed hover effect for new chat button */
+
+/* Conversation list styling */
+.conversation-item {
+  padding: 15px;
+  margin-bottom: 12px;
+  background-color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid #e9ecef;
+  position: relative;
+}
+
+/* Removed hover effects for conversation items */
+
+.conversation-item.active {
+  background-color: #e3f2fd;
+  border-left: 4px solid #0d6efd;
+}
+
+.convo-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #333;
+}
+
+.convo-date {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+/* Main chat container */
+.chat-container {
+  height: calc(100vh - 150px);
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+}
+
+.chat-header {
+  padding: 15px 20px !important;
+  border-bottom: none;
+  margin: 10px 10px 0 10px; /* Added padding to prevent touching outer div */
+  border-radius: 8px !important; /* Ensuring rounded corners for inner header */
+}
+
+.chat-header h2 {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+#toggle-sidebar {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Chat messages area */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px !important;
+  background-color: #fcfcfc;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.7) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.7) 1px, transparent 1px);
+  background-size: 20px 20px;
+  scroll-behavior: smooth;
+  margin: 0 10px; /* Added side margins */
+}
+
+/* Message styling */
+.message {
+  margin-bottom: 20px;
+  padding: 15px 18px;
   border-radius: 18px;
-  max-width: 75%;
-  animation: fadeIn 0.3s ease;
+  max-width: 80%;
+  position: relative;
+  animation: fadeIn 0.4s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 2s ease-out forwards;
 }
 
 .user-message {
   background-color: #e3f2fd;
   margin-left: auto;
   border-bottom-right-radius: 5px;
-  color: #0d6efd;
+  color: #0d47a1;
+  border-left: 1px solid #bbdefb;
 }
 
 .bot-message {
-  background-color: #f8f9fa;
+  background-color: #f5f5f5;
   margin-right: auto;
   border-bottom-left-radius: 5px;
+  color: #333;
+  border-right: 1px solid #e0e0e0;
 }
 
 .error-message {
-  background-color: #f8d7da;
-  color: #842029;
-  border-left: 3px solid #842029;
+  background-color: #ffebee;
+  color: #c62828;
+  border-left: 3px solid #ef5350;
+  margin: 15px auto;
+  width: 90%;
+  text-align: center;
 }
 
 /* Typing indicator */
 .typing-indicator {
   display: inline-block;
-  padding: 10px 15px;
-  background-color: #f8f9fa;
+  padding: 12px 18px;
+  background-color: #f5f5f5;
   border-radius: 18px;
   margin-bottom: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .typing-indicator span {
   height: 8px;
   width: 8px;
-  background-color: #6c757d;
+  background-color: #0d6efd;
   display: inline-block;
   border-radius: 50%;
   margin-right: 5px;
-  animation: typing-bounce 1s infinite;
+  animation: typing-bounce 1.2s infinite;
 }
 
-.typing-indicator span:nth-child(2) {
-  animation-delay: 0.2s;
+/* Chat input area */
+.chat-input {
+  background-color: #fff;
+  padding: 15px 20px !important;
+  border-top: 1px solid #e9ecef;
+  margin: 0 10px 10px 10px; /* Added margins all around */
+  border-radius: 0 0 8px 8px; /* Rounded bottom corners */
 }
 
-.typing-indicator span:nth-child(3) {
-  animation-delay: 0.4s;
+#user-input {
+  border-radius: 20px;
+  padding: 12px 15px;
+  resize: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  min-height: 50px;
+  max-height: 150px;
 }
 
-/* Context menu */
+#user-input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  border-color: #86b7fe;
+}
+
+#send-btn {
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+/* Removed hover effect for send button */
+
+#send-btn i {
+  font-size: 1.2rem;
+}
+
+/* Context menu styling */
 .context-menu {
   position: absolute;
   z-index: 1000;
   background-color: white;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  min-width: 170px;
+}
+
+.context-menu .list-group {
+  border-radius: 0;
 }
 
 .context-menu .list-group-item {
-  cursor: pointer;
+  padding: 10px 15px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  border: none;
+  border-radius: 0;
 }
+
+.context-menu .list-group-item i {
+  margin-right: 8px;
+  font-size: 1rem;
+}
+
+/* Removed hover effects for context menu items */
 
 .context-menu .delete {
   color: #dc3545;
 }
 
-/* Animations - renamed to avoid conflicts */
+/* Animations */
 @keyframes typing-bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-5px); }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* fadeIn animation is already defined in your CSS */
 
 /* Responsive adjustments */
+@media (max-width: 992px) {
+  .chat-wrapper {
+    max-width: 100%;
+    padding: 15px;
+  }
+}
+
 @media (max-width: 768px) {
   .chat-sidebar {
-      height: 200px;
-      border-right: none;
-      border-bottom: 1px solid #dee2e6;
+    height: 250px;
+    border-right: none;
+    border-bottom: 1px solid #dee2e6;
   }
   
   .chat-container {
-      height: calc(100vh - 320px);
+    height: calc(100vh - 400px);
+    min-height: 400px;
   }
   
   .chat-sidebar.collapsed {
-      display: none;
+    display: none;
+  }
+
+  .message {
+    max-width: 90%;
+  }
+  
+  .chat-row {
+    margin: 5px; /* Smaller margin on mobile */
   }
 }
 
-/* Navigation sidebar (the vertical one) - separate styles */
-.chat-wrapper {
-  /* max-width:90%; */
-  width: 100%;
-  margin: 0 auto;
- 
-}
-.chat-wrapper .row{
-  box-sizing: border-box;
-
-}
-
-@media (min-width: 992px) {
-  .chat-wrapper .row {
-      margin-left: 60px; /* Adjust for the nav-sidebar */
+/* For very small screens */
+@media (max-width: 480px) {
+  .chat-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  #send-btn {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .message {
+    padding: 12px 15px;
+    max-width: 95%;
+  }
+  
+  .chat-header, .chat-messages, .chat-input {
+    margin: 5px; /* Smaller margins on very small screens */
   }
 }
-
 
