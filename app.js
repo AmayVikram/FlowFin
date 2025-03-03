@@ -1540,12 +1540,294 @@ function calculateNextDueDate(currentDueDate, recurringType) {
   return nextDate;
 }
 
+
+
+
+
+
+// Import the AI chat routes
+const aiChatRoutes = require('./routes/ai_chat');
+// Use the AI chat routes
+app.use('/', aiChatRoutes);
+
+
+const fs = require('fs');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const PDFDocument = require('pdfkit');
+// Adjust path as needed
+
+// Initialize Gemini API
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+// PDF generation route
+app.get('/download-transaction-pdf', ensureAuthenticated, async (req, res) => {
+  try {
+    // Get user's transaction data using the correct field name (user instead of userId)
+    const transactions = await Transaction.find({ user: req.user._id })
+      .sort({ date: -1 })
+      .lean();
+    
+    if (transactions.length === 0) {
+      return res.status(404).send('No transactions found to generate a report');
+    }
+     
+    const user = await User.findById(req.user.id);
+    
+    
+    // Create a temporary directory for PDFs if it doesn't exist
+    const pdfDir = path.join(__dirname, 'temp-pdfs');
+    if (!fs.existsSync(pdfDir)) {
+      fs.mkdirSync(pdfDir);
+    }
+    
+    // Create filename with timestamp to avoid collisions
+    const filename = `transaction_history_${req.user._id}_${Date.now()}.pdf`;
+    const filePath = path.join(pdfDir, filename);
+    
+    // Generate PDF content using Gemini
+    const pdfContent = await generatePdfContent(transactions, req.user);
+    
+    // Write PDF content to file
+    await generatePdf(pdfContent, filePath,user);
+    
+    // Send the file as a download
+    res.download(filePath, 'transaction_history.pdf', (err) => {
+      if (err) {
+        console.error('Download error:', err);
+        return res.status(500).send('Error downloading file');
+      }
+      
+      // Delete the file after download
+      fs.unlink(filePath, (unlinkErr) => {
+        if (unlinkErr) {
+          console.error('Error deleting temporary file:', unlinkErr);
+        }
+      });
+    });
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    res.status(500).send('Error generating PDF');
+  }
+});
+
+// Function to generate PDF content using Gemini
+async function generatePdfContent(transactions, user) {
+  // Calculate summary statistics
+  const totalIncome = transactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+    
+  const totalExpense = transactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+    
+  const netBalance = totalIncome - totalExpense;
+  
+  // Group transactions by category
+  const categories = {};
+  transactions.forEach(t => {
+    if (!categories[t.category]) {
+      categories[t.category] = {
+        income: 0,
+        expense: 0
+      };
+    }
+    categories[t.category][t.type] += t.amount;
+  });
+  
+  // Get top spending categories
+  const topExpenseCategories = Object.entries(categories)
+    .map(([category, data]) => ({
+      category,
+      amount: data.expense
+    }))
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 3);
+  
+  // Get top income categories
+  const topIncomeCategories = Object.entries(categories)
+    .map(([category, data]) => ({
+      category,
+      amount: data.income
+    }))
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 3);
+  
+  // Calculate monthly trends if possible
+  const months = {};
+  transactions.forEach(t => {
+    const date = new Date(t.date);
+    const monthKey = `${date.getFullYear()}-${date.getMonth()+1}`;
+    
+    if (!months[monthKey]) {
+      months[monthKey] = {
+        income: 0,
+        expense: 0,
+        month: date.toLocaleString('default', { month: 'long' }),
+        year: date.getFullYear()
+      };
+    }
+    
+    months[monthKey][t.type] += t.amount;
+  });
+  
+  // Create a prompt for Gemini to generate formatted PDF content with specific formatting instructions
+  const prompt = `
+    Generate a well-formatted financial report with the following sections. Follow the formatting instructions exactly.
+
+    FINANCIAL DATA:
+    Total Income: $${totalIncome.toFixed(2)}
+    Total Expenses: $${totalExpense.toFixed(2)}
+    Net Balance: $${netBalance.toFixed(2)}
+    
+    Top Expense Categories: ${topExpenseCategories.map(c => `${c.category} ($${c.amount.toFixed(2)})`).join(', ')}
+    Top Income Categories: ${topIncomeCategories.map(c => `${c.category} ($${c.amount.toFixed(2)})`).join(', ')}
+    
+    CATEGORY BREAKDOWN DATA:
+    ${Object.entries(categories).map(([category, data]) => 
+      `${category}: Income: $${data.income.toFixed(2)}, Expenses: $${data.expense.toFixed(2)}, Net: $${(data.income - data.expense).toFixed(2)}`
+    ).join('\n')}
+    
+    TRANSACTION DATA:
+    ${transactions.map(t => 
+      `Date: ${new Date(t.date).toLocaleDateString()}, Type: ${t.type}, Amount: $${t.amount.toFixed(2)}, Category: ${t.category}, Description: ${t.description || 'N/A'}`
+    ).join('\n')}
+    
+    FORMATTING INSTRUCTIONS:
+    1. Create an "EXECUTIVE SUMMARY" section with total income, expenses, and net balance in a clear, readable format.
+    
+    2. Create a "CATEGORY ANALYSIS" section that presents the category data in a table format with these columns: Category, Income, Expenses, Net Balance.
+    
+    3. Create a "FINANCIAL INSIGHTS" section that analyzes the spending habits and income patterns. Include:
+       - Comments on the top spending categories
+       - Comments on the top income sources
+       - Suggestions for budget improvements based on the spending patterns
+       - Savings potential based on expense categories
+    
+    4. Create a "TRANSACTION DETAILS" section that presents the transactions in a list format, with each transaction showing date, type, amount, category, and description.
+    
+    5. DO NOT use markdown formatting or special characters that wouldn't render well in a PDF.
+    
+    6. Use clear section headings and consistent formatting throughout.
+    
+    7. For the table in the CATEGORY ANALYSIS section, use consistent spacing to create a table-like format that will be readable in a PDF.
+    
+    8. Leave lines after each section
+    
+    9. Do not use * for bolding or markdowns anywhere`;
+  
+  // Get response from Gemini
+  const result = await model.generateContent(prompt);
+  const response = result.response.text();
+  
+  return response;
+}
+
+async function generatePdf(content, outputPath, user) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Create a simple PDF document
+      const doc = new PDFDocument({
+        margins: { top: 50, bottom: 50, left: 50, right: 50 },
+        size: 'A4'
+      });
+      
+      // Pipe output to file
+      const stream = fs.createWriteStream(outputPath);
+      doc.pipe(stream);
+      
+      // Add logo or header
+      doc.fontSize(24)
+         .font('Helvetica-Bold')
+         .text('FlowFin', { align: 'center' });
+      
+      doc.fontSize(18)
+         .font('Helvetica')
+         .text('Financial Report', { align: 'center' });
+      
+      doc.moveDown(1);
+      
+      // Add user name and date directly in the PDF
+      doc.fontSize(12)
+         .font('Helvetica-Bold')
+         .text(`User: ${user?.name || user?.fullName || 'User'}`, { align: 'left' });
+      
+      doc.fontSize(12)
+         .font('Helvetica-Bold')
+         .text(`Date: ${new Date().toLocaleDateString()}`, { align: 'left' });
+      
+      doc.moveDown(2);
+      
+      // Process content from Gemini - with improved section handling
+      const sections = content.split(/\n\s*\n/);
+      
+      sections.forEach(section => {
+        const trimmedSection = section.trim();
+        if (trimmedSection.length === 0) return;
+        
+        // Check if it's a heading (all caps with or without colon)
+        if (/^[A-Z][A-Z\s]+:?$/.test(trimmedSection)) {
+          doc.fontSize(16)
+             .font('Helvetica-Bold')
+             .text(trimmedSection, {
+               width: doc.page.width - 100
+             });
+          doc.moveDown(1);
+        } 
+        // Check if it might be a table row (contains multiple dollar signs)
+        else if (trimmedSection.split('$').length > 3) {
+          doc.fontSize(10)
+             .font('Courier')
+             .text(trimmedSection, {
+               align: 'left',
+               width: doc.page.width - 100,
+               lineGap: 2
+             });
+          doc.moveDown(0.3);
+        }
+        // Regular content
+        else {
+          doc.fontSize(12)
+             .font('Helvetica')
+             .text(trimmedSection, {
+               align: 'left',
+               width: doc.page.width - 100,
+               lineGap: 5
+             });
+          doc.moveDown(0.5);
+        }
+      });
+      
+      // Finalize the PDF
+      doc.end();
+      
+      stream.on('finish', () => {
+        resolve();
+      });
+      
+      stream.on('error', reject);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+
+
+
+
+
+
 // Import the scheduler
 const { scheduleEmailReminders } = require('./schedulers/emailReminders');
 
 // Start the scheduler when the app starts
 
   scheduleEmailReminders();
+
+
+
 
 
 
