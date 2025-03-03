@@ -733,18 +733,26 @@ header{
 }
 
 
-/* Chat container styles */
-.sidebar {
+
+
+
+
+
+ /* Chat interface styles  */
+.chat-sidebar {
   background-color: #f8f9fa;
   border-right: 1px solid #dee2e6;
   height: calc(100vh - 120px);
   overflow-y: auto;
+  min-width:400px;
+  
 }
 
 .chat-container {
   height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
+
 }
 
 .chat-messages {
@@ -786,6 +794,20 @@ header{
   font-size: 0.8rem;
   color: #6c757d;
 }
+
+.chat-wrapper .row {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 767.98px) {
+  .chat-wrapper .row {
+      flex-wrap: wrap;
+  }
+}
+
+
+
 
 /* Message styles */
 .message {
@@ -831,7 +853,7 @@ header{
   display: inline-block;
   border-radius: 50%;
   margin-right: 5px;
-  animation: typing 1s infinite;
+  animation: typing-bounce 1s infinite;
 }
 
 .typing-indicator span:nth-child(2) {
@@ -860,8 +882,8 @@ header{
   color: #dc3545;
 }
 
-/* Animations */
-@keyframes typing {
+/* Animations - renamed to avoid conflicts */
+@keyframes typing-bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-5px); }
 }
@@ -873,7 +895,7 @@ header{
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .sidebar {
+  .chat-sidebar {
       height: 200px;
       border-right: none;
       border-bottom: 1px solid #dee2e6;
@@ -883,7 +905,27 @@ header{
       height: calc(100vh - 320px);
   }
   
-  .sidebar.collapsed {
+  .chat-sidebar.collapsed {
       display: none;
   }
 }
+
+/* Navigation sidebar (the vertical one) - separate styles */
+.chat-wrapper {
+  /* max-width:90%; */
+  width: 100%;
+  margin: 0 auto;
+ 
+}
+.chat-wrapper .row{
+  box-sizing: border-box;
+
+}
+
+@media (min-width: 992px) {
+  .chat-wrapper .row {
+      margin-left: 60px; /* Adjust for the nav-sidebar */
+  }
+}
+
+
