@@ -32,7 +32,7 @@
                   (<%= quote.regularMarketChange >= 0 ? '+' : '' %><%= quote.regularMarketChangePercent.toFixed(2) %>%)
                 </h4>
               </div>
-              <p class="text-muted">As of <%= new Date("2025-03-04T09:19:20.000Z").toLocaleString() %></p>
+              <p class="text-muted">As of <%= new Date(quote.regularMarketTime).toLocaleString() %></p>
               
               <% if (userOwnsStock && holdings) { %>
                 <div class="alert alert-info mt-3">
