@@ -1,0 +1,382 @@
+<%- include('partials/header') %>
+
+<style>
+    .chart-container {
+  position: relative;
+  height: 400px; /* Set a fixed height */
+  width: 100%;
+}
+
+</style>
+
+<div class="container">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">Investment Portfolio</h3>
+          <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addStockModal">
+            Add Stock
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Exchange Selector -->
+          <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+              <a class="nav-link <%= activeExchange === 'NSE' ? 'active' : '' %>" href="/portfolio?exchange=NSE">NSE</a>
+            </li>
+            <li class="nav-item " style="display: none;">
+              <a class="nav-link <%= activeExchange === 'BSE' ? 'active' : '' %>" href="/portfolio?exchange=BSE">BSE</a>
+            </li>
+          </ul>
+          
+          <!-- Stock Table -->
+          <% 
+            let currentStocks = [];
+            if (activeExchange === 'NSE') {
+              currentStocks = nseStocks;
+            } else {
+              currentStocks = bseStocks;
+            }
+          %>
+          
+          <% if (currentStocks && currentStocks.length > 0) { %>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Shares</th>
+                    <th>Purchase Price</th>
+                    <th>Purchase Date</th>
+                    <th>Current Price</th>
+                    <th>Change</th>
+                    <th>Investment Value</th>
+                    <th>Current Value</th>
+                    <th>Gain/Loss</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% currentStocks.forEach(stock => { %>
+                    <tr>
+                      <td><%= stock.symbol %></td>
+                      <td><%= stock.shares.toFixed(2) %></td>
+                      <td>₹<%= stock.purchasePrice.toFixed(2) %></td>
+                      <td><%= new Date(stock.purchaseDate).toLocaleDateString() %></td>
+                      <% if (stock.error) { %>
+                        <td colspan="4" class="text-danger">Error fetching current data</td>
+                      <% } else { %>
+                        <td>₹<%= stock.currentPrice.toFixed(2) %></td>
+                        <td class="<%= stock.change >= 0 ? 'text-success' : 'text-danger' %>">
+                          <%= stock.change >= 0 ? '+' : '' %><%= stock.change.toFixed(2) %>%
+                        </td>
+                        <td>₹<%= stock.investmentValue.toFixed(2) %></td>
+                        <td>₹<%= stock.currentValue.toFixed(2) %></td>
+                        <td class="<%= stock.gain >= 0 ? 'text-success' : 'text-danger' %>">
+                          ₹<%= stock.gain.toFixed(2) %>
+                          (<%= stock.gain >= 0 ? '+' : '' %><%= stock.gainPercentage.toFixed(2) %>%)
+                        </td>
+                      <% } %>
+                      <td>
+                        <div class="btn-group">
+                          <a href="/stock/<%= stock.symbol %>?exchange=<%= stock.exchange %>" class="btn btn-sm btn-info">
+                            <i class="bi bi-graph-up"></i>
+                          </a>
+                          <form action="/portfolio/delete/<%= stock.id %>" method="POST" onsubmit="return confirm('Are you sure you want to remove this stock from your portfolio?')">
+                            <input type="hidden" name="exchange" value="<%= activeExchange %>">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="text-center py-5">
+              <i class="bi bi-bar-chart-line fs-1 text-muted"></i>
+              <h4 class="mt-3">No <%= activeExchange %> stocks in your portfolio</h4>
+              <p class="text-muted">Start building your investment portfolio by adding stocks.</p>
+              <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#addStockModal">
+                Add Your First Stock
+              </button>
+            </div>
+          <% } %>
+          
+          <!-- Portfolio Summary -->
+          <% if ((nseStocks && nseStocks.length > 0) || (bseStocks && bseStocks.length > 0)) { %>
+            <div class="card mt-4">
+              <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Portfolio Summary</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-3">
+                    <div class="card text-center h-100">
+                      <div class="card-body">
+                        <h6 class="card-title">Total Investment</h6>
+                        <h4 class="card-text">₹<%= totalInvestment.toFixed(2) %></h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="card text-center h-100">
+                      <div class="card-body">
+                        <h6 class="card-title">Current Value</h6>
+                        <h4 class="card-text">₹<%= totalCurrentValue.toFixed(2) %></h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="card text-center h-100 <%= totalGain >= 0 ? 'border-success' : 'border-danger' %>">
+                      <div class="card-body">
+                        <h6 class="card-title">Total Gain/Loss</h6>
+                        <h4 class="card-text <%= totalGain >= 0 ? 'text-success' : 'text-danger' %>">
+                          ₹<%= totalGain.toFixed(2) %>
+                        </h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="card text-center h-100 <%= totalGainPercentage >= 0 ? 'border-success' : 'border-danger' %>">
+                      <div class="card-body">
+                        <h6 class="card-title">Return</h6>
+                        <h4 class="card-text <%= totalGainPercentage >= 0 ? 'text-success' : 'text-danger' %>">
+                          <%= totalGainPercentage >= 0 ? '+' : '' %><%= totalGainPercentage.toFixed(2) %>%
+                        </h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Portfolio Allocation Chart -->
+                <div class="row mt-4">
+                  <div class="col-md-6">
+                    <h5 class="text-center mb-3">Portfolio Allocation</h5>
+                    <div class="chart-container">
+                    <canvas id="allocationChart" height="300"></canvas>
+                </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h5 class="text-center mb-3">Performance by Stock</h5>
+                    <div class="chart-container">
+                    <canvas id="performanceChart" height="300"></canvas>
+                </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Stock Modal -->
+<div class="modal fade" id="addStockModal" tabindex="-1" aria-labelledby="addStockModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/portfolio/add" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addStockModalLabel">Add Stock to Portfolio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="exchange" class="form-label">Exchange</label>
+            <select class="form-select" id="exchange" name="exchange" required>
+              <option value="NSE" <%= activeExchange === 'NSE' ? 'selected' : '' %>>NSE</option>
+              <option value="BSE" <%= activeExchange === 'BSE' ? 'selected' : '' %>>BSE</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="symbol" class="form-label">Stock Symbol</label>
+            <input type="text" class="form-control" id="symbol" name="symbol" required>
+            <div class="form-text">Enter the stock symbol without exchange suffix (e.g., RELIANCE, INFY)</div>
+          </div>
+          <div class="mb-3">
+            <label for="shares" class="form-label">Number of Shares</label>
+            <input type="number" step="0.01" class="form-control" id="shares" name="shares" required>
+          </div>
+          <div class="mb-3">
+            <label for="purchasePrice" class="form-label">Purchase Price Per Share</label>
+            <div class="input-group">
+              <span class="input-group-text">₹</span>
+              <input type="number" step="0.01" class="form-control" id="purchasePrice" name="purchasePrice" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="purchaseDate" class="form-label">Purchase Date</label>
+            <input type="date" class="form-control" id="purchaseDate" name="purchaseDate" value="<%= new Date().toISOString().split('T')[0] %>" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    <% if ((nseStocks && nseStocks.length > 0) || (bseStocks && bseStocks.length > 0)) { %>
+      // Create allocation chart
+      createAllocationChart();
+      
+      // Create performance chart
+      createPerformanceChart();
+    <% } %>
+  });
+  
+  function createAllocationChart() {
+    // Combine all stocks
+    const allStocks = [
+      ...<%- JSON.stringify(nseStocks.filter(s => !s.error)) %>,
+      ...<%- JSON.stringify(bseStocks.filter(s => !s.error)) %>
+    ];
+    
+    // Group by symbol
+    const stocksBySymbol = {};
+    allStocks.forEach(stock => {
+      const key = `${stock.symbol} (${stock.exchange})`;
+      if (!stocksBySymbol[key]) {
+        stocksBySymbol[key] = 0;
+      }
+      stocksBySymbol[key] += stock.currentValue;
+    });
+    
+    const labels = Object.keys(stocksBySymbol);
+    const data = Object.values(stocksBySymbol);
+    
+    // Generate colors
+    const colors = generateColors(labels.length);
+    
+    // Create chart
+    const ctx = document.getElementById('allocationChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: colors,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              boxWidth: 15
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.raw || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((value / total) * 100);
+                return `${label}: ₹${value.toFixed(2)} (${percentage}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  function createPerformanceChart() {
+    // Combine all stocks
+    const allStocks = [
+      ...<%- JSON.stringify(nseStocks.filter(s => !s.error)) %>,
+      ...<%- JSON.stringify(bseStocks.filter(s => !s.error)) %>
+    ];
+    
+    // Sort by gain percentage
+    allStocks.sort((a, b) => b.gainPercentage - a.gainPercentage);
+    
+    // Take top 10 stocks
+    const topStocks = allStocks.slice(0, 10);
+    
+    const labels = topStocks.map(stock => `${stock.symbol} (${stock.exchange})`);
+    const data = topStocks.map(stock => stock.gainPercentage);
+    
+    // Generate colors based on gain/loss
+    const colors = topStocks.map(stock => 
+      stock.gainPercentage >= 0 ? 'rgba(40, 167, 69, 0.7)' : 'rgba(220, 53, 69, 0.7)'
+    );
+    
+    // Create chart
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Return (%)',
+          data: data,
+          backgroundColor: colors,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const value = context.raw || 0;
+                return `Return: ${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          },
+          y: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  function generateColors(count) {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+      const hue = (i * 137.5) % 360; // Use golden angle approximation for even distribution
+      colors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+    }
+    return colors;
+  }
+</script>
+
+<%- include('partials/footer') %>

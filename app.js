@@ -1816,6 +1816,362 @@ async function generatePdf(content, outputPath, user) {
 
 
 
+// POrtfolio routes 
+
+const yahooFinance = require('yahoo-finance2').default;
+const Portfolio = require('./models/Portfolio')
+
+
+// Portfolio dashboard
+app.get('/portfolio', ensureAuthenticated, async (req, res) => {
+  try {
+    // Get user's portfolio from database
+    const portfolio = await Portfolio.findOne({ user: req.user.id });
+    
+    // Initialize summary data
+    let totalInvestment = 0;
+    let totalCurrentValue = 0;
+    let nseStocks = [];
+    let bseStocks = [];
+    
+    // Fetch current data for all stocks in portfolio
+    if (portfolio && portfolio.stocks.length > 0) {
+      for (const stock of portfolio.stocks) {
+        // Append .NS or .BO based on exchange
+        const yahooSymbol = stock.exchange === 'NSE' ? `${stock.symbol}.NS` : `${stock.symbol}.BO`;
+        
+        try {
+          const quote = await yahooFinance.quote(yahooSymbol);
+          
+          const stockData = {
+            id: stock._id,
+            symbol: stock.symbol,
+            exchange: stock.exchange,
+            shares: stock.shares,
+            purchasePrice: stock.purchasePrice,
+            purchaseDate: stock.purchaseDate,
+            currentPrice: quote.regularMarketPrice,
+            change: quote.regularMarketChangePercent,
+            investmentValue: stock.shares * stock.purchasePrice,
+            currentValue: stock.shares * quote.regularMarketPrice,
+            gain: (stock.shares * quote.regularMarketPrice) - (stock.shares * stock.purchasePrice),
+            gainPercentage: (((quote.regularMarketPrice - stock.purchasePrice) / stock.purchasePrice) * 100)
+          };
+          
+          // Add to appropriate exchange array
+          if (stock.exchange === 'NSE') {
+            nseStocks.push(stockData);
+          } else {
+            bseStocks.push(stockData);
+          }
+          
+          // Update totals
+          totalInvestment += stockData.investmentValue;
+          totalCurrentValue += stockData.currentValue;
+        } catch (error) {
+          console.error(`Error fetching data for ${yahooSymbol}:`, error);
+          // Add with error status
+          const stockData = {
+            id: stock._id,
+            symbol: stock.symbol,
+            exchange: stock.exchange,
+            shares: stock.shares,
+            purchasePrice: stock.purchasePrice,
+            purchaseDate: stock.purchaseDate,
+            error: true,
+            investmentValue: stock.shares * stock.purchasePrice
+          };
+          
+          if (stock.exchange === 'NSE') {
+            nseStocks.push(stockData);
+          } else {
+            bseStocks.push(stockData);
+          }
+          
+          // Still count the investment
+          totalInvestment += stockData.investmentValue;
+        }
+      }
+    }
+    
+    // Calculate overall performance
+    const totalGain = totalCurrentValue - totalInvestment;
+    const totalGainPercentage = totalInvestment > 0 ? ((totalGain / totalInvestment) * 100) : 0;
+    
+    res.render('portfolio', {
+      title: 'Investment Portfolio',
+      portfolio,
+      nseStocks,
+      bseStocks,
+      totalInvestment,
+      totalCurrentValue,
+      totalGain,
+      totalGainPercentage,
+      activeExchange: req.query.exchange || 'NSE' // Default to NSE
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error loading portfolio data');
+    res.redirect('/dashboard');
+  }
+});
+
+
+// Add stock to portfolio
+app.post('/portfolio/add', ensureAuthenticated, async (req, res) => {
+  try {
+    const { symbol, exchange, shares, purchasePrice, purchaseDate } = req.body;
+    
+    // Validate the stock symbol with appropriate suffix
+    const yahooSymbol = exchange === 'NSE' ? `${symbol}.NS` : `${symbol}.BO`;
+    
+    try {
+      const quote = await yahooFinance.quote(yahooSymbol);
+      if (!quote) {
+        req.flash('error', 'Invalid stock symbol');
+        return res.redirect('/portfolio');
+      }
+    } catch (error) {
+      req.flash('error', `Could not verify stock symbol: ${error.message}`);
+      return res.redirect('/portfolio');
+    }
+    
+    // Add to portfolio
+    await Portfolio.findOneAndUpdate(
+      { user: req.user.id },
+      { 
+        $push: { 
+          stocks: {
+            symbol: symbol.toUpperCase(),
+            exchange,
+            shares: parseFloat(shares),
+            purchasePrice: parseFloat(purchasePrice),
+            purchaseDate: new Date(purchaseDate)
+          }
+        }
+      },
+      { upsert: true, new: true }
+    );
+    
+    req.flash('success', `Added ${shares} shares of ${symbol.toUpperCase()} (${exchange}) to your portfolio`);
+    res.redirect('/portfolio?exchange=' + exchange);
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error adding stock to portfolio');
+    res.redirect('/portfolio');
+  }
+});
+
+app.post('/portfolio/delete/:stockId', ensureAuthenticated, async (req, res) => {
+  try {
+    const { stockId } = req.params;
+    const { exchange } = req.body;
+    
+    // Find the portfolio and remove the stock
+    const result = await Portfolio.findOneAndUpdate(
+      { user: req.user.id },
+      { $pull: { stocks: { _id: stockId } } },
+      { new: true }
+    );
+    
+    if (!result) {
+      req.flash('error', 'Stock not found in portfolio');
+      return res.redirect('/portfolio');
+    }
+    
+    req.flash('success', 'Stock removed from portfolio');
+    res.redirect('/portfolio?exchange=' + (exchange || 'NSE'));
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error removing stock from portfolio');
+    res.redirect('/portfolio');
+  }
+});
+
+
+
+// Stock details route
+// Stock details route with exchange parameter
+app.get('/stock/:symbol', ensureAuthenticated, async (req, res) => {
+  try {
+    const { symbol } = req.params;
+    const { exchange = 'NSE' } = req.query;
+    
+    // Append exchange suffix
+    const yahooSymbol = exchange === 'NSE' ? `${symbol}.NS` : `${symbol}.BO`;
+    
+    // Get stock quote
+    const quote = await yahooFinance.quote(yahooSymbol);
+    
+    // Get historical data (1 year by default)
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    
+    const historical = await yahooFinance.historical(yahooSymbol, {
+      period1: oneYearAgo.toISOString().split('T')[0],
+      period2: new Date().toISOString().split('T')[0],
+      interval: '1d'
+    });
+    
+    // Get additional modules for more data
+    const modules = await yahooFinance.quoteSummary(yahooSymbol, {
+      modules: ['financialData', 'summaryDetail', 'defaultKeyStatistics', 'recommendationTrend']
+    });
+    
+    // Check if user owns this stock
+    const portfolio = await Portfolio.findOne({ 
+      user: req.user.id,
+      'stocks.symbol': symbol.toUpperCase(),
+      'stocks.exchange': exchange
+    });
+    
+    const userOwnsStock = portfolio !== null;
+    
+    // If user owns the stock, get their holdings
+    let holdings = null;
+    if (userOwnsStock) {
+      const stockData = portfolio.stocks.filter(
+        s => s.symbol === symbol.toUpperCase() && s.exchange === exchange
+      );
+      
+      // Calculate total holdings
+      let totalShares = 0;
+      let totalInvestment = 0;
+      
+      stockData.forEach(stock => {
+        totalShares += stock.shares;
+        totalInvestment += stock.shares * stock.purchasePrice;
+      });
+      
+      const avgPurchasePrice = totalInvestment / totalShares;
+      const currentValue = totalShares * quote.regularMarketPrice;
+      const gain = currentValue - totalInvestment;
+      const gainPercentage = (gain / totalInvestment) * 100;
+      
+      holdings = {
+        totalShares,
+        totalInvestment,
+        avgPurchasePrice,
+        currentValue,
+        gain,
+        gainPercentage
+      };
+    }
+    
+    res.render('stock-detail', {
+      title: `${symbol.toUpperCase()} - Stock Details`,
+      symbol: symbol.toUpperCase(),
+      exchange,
+      quote,
+      historical,
+      financialData: modules.financialData,
+      summaryDetail: modules.summaryDetail,
+      keyStats: modules.defaultKeyStatistics,
+      recommendations: modules.recommendationTrend,
+      userOwnsStock,
+      holdings
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Error fetching stock data: ' + err.message);
+    res.redirect('/portfolio');
+  }
+});
+
+// Route for getting real-time data updates
+app.get('/api/stock/:symbol/realtime', ensureAuthenticated, async (req, res) => {
+  try {
+    const { symbol } = req.params;
+    const { exchange = 'NSE' } = req.query;
+    
+    // Append exchange suffix
+    const yahooSymbol = exchange === 'NSE' ? `${symbol}.NS` : `${symbol}.BO`;
+    
+    // Get latest quote
+    const quote = await yahooFinance.quote(yahooSymbol);
+    
+    res.json({
+      price: quote.regularMarketPrice,
+      change: quote.regularMarketChange,
+      changePercent: quote.regularMarketChangePercent,
+      volume: quote.regularMarketVolume,
+      time: quote.regularMarketTime * 1000, // Convert to milliseconds
+      previousClose: quote.regularMarketPreviousClose,
+      open: quote.regularMarketOpen,
+      dayHigh: quote.regularMarketDayHigh,
+      dayLow: quote.regularMarketDayLow
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Route for getting historical data with different time periods
+app.get('/api/stock/:symbol/historical', ensureAuthenticated, async (req, res) => {
+  try {
+    const { symbol } = req.params;
+    const { exchange = 'NSE', period = '1y' } = req.query;
+    
+    // Append exchange suffix
+    const yahooSymbol = exchange === 'NSE' ? `${symbol}.NS` : `${symbol}.BO`;
+    
+    // Calculate start date based on period
+    const endDate = new Date();
+    let startDate = new Date();
+    let interval = '1d';
+    
+    switch(period) {
+      case '1d':
+        startDate.setDate(startDate.getDate() - 1);
+        interval = '5m';
+        break;
+      case '5d':
+        startDate.setDate(startDate.getDate() - 5);
+        interval = '15m';
+        break;
+      case '1m':
+        startDate.setMonth(startDate.getMonth() - 1);
+        interval = '1d';
+        break;
+      case '3m':
+        startDate.setMonth(startDate.getMonth() - 3);
+        interval = '1d';
+        break;
+      case '6m':
+        startDate.setMonth(startDate.getMonth() - 6);
+        interval = '1d';
+        break;
+      case '1y':
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        interval = '1d';
+        break;
+      case '5y':
+        startDate.setFullYear(startDate.getFullYear() - 5);
+        interval = '1wk';
+        break;
+      case 'max':
+        startDate = new Date('1970-01-01');
+        interval = '1mo';
+        break;
+    }
+    
+    // Get historical data
+    const historical = await yahooFinance.historical(yahooSymbol, {
+      period1: startDate.toISOString().split('T')[0],
+      period2: endDate.toISOString().split('T')[0],
+      interval: interval
+    });
+    
+    res.json(historical);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 
 
 

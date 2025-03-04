@@ -7,7 +7,7 @@ const { sendBillReminder } = require('../utils/emailservice');
 // Function to schedule daily email checks
 function scheduleEmailReminders() {
   // Run every day at 8:00 AM
-  cron.schedule('13 17 * * *', async () => {
+  cron.schedule('44 11 * * *', async () => {
     console.log('Running email reminder check...');
     
     try {

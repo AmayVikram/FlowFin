@@ -24,6 +24,8 @@
                     <ul class="nav">
                         <% if (typeof user !== 'undefined' && user) { %>
                             <li class="nav-item"><a href="/dashboard" class="nav-link text-white">Dashboard</a></li>
+                        
+
                             <li class="nav-item"><a href="/logout" class="nav-link text-white">Logout</a></li>
                         <% } else { %>
                             <li class="nav-item"><a href="/login" class="nav-link text-white">Login</a></li>
@@ -57,6 +59,10 @@
             <i class="bi bi-file-earmark-bar-graph"></i>
             <span class="sidebar-text">Reports</span>
         </a>
+        <a href="/portfolio" class="sidebar-item">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span class="sidebar-text">Portfolio</span>
+        </a>
         <a href="/ai_help" class="sidebar-item">
             <i class="bi bi-robot"></i>
             <span class="sidebar-text">AI Assistant</span>
@@ -65,7 +71,7 @@
     
     
     <main class="container py-4 " >
-        <!-- Your main content here -->
+        <!--main content here -->
     </main>
 </body>
 </html>

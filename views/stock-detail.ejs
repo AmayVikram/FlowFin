@@ -1,0 +1,523 @@
+<%- include('partials/header') %>
+
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <div>
+            <h3 class="mb-0">
+              <%= symbol %> <small class="text-light">(<%= exchange %>)</small>
+              <% if (quote.longName && quote.longName !== symbol) { %>
+                - <%= quote.longName %>
+              <% } %>
+            </h3>
+            
+          </div>
+          <div class="d-flex">
+           
+            
+            <a href="/portfolio?exchange=<%= exchange %>" class="btn btn-light">Back to Portfolio</a>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <!-- Current Price and Stats -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="d-flex align-items-baseline">
+                <h1 class="me-3">₹<%= quote.regularMarketPrice.toFixed(2) %></h1>
+                <h4 class="<%= quote.regularMarketChange >= 0 ? 'text-success' : 'text-danger' %>">
+                  <%= quote.regularMarketChange >= 0 ? '+' : '' %>₹<%= quote.regularMarketChange.toFixed(2) %>
+                  (<%= quote.regularMarketChange >= 0 ? '+' : '' %><%= quote.regularMarketChangePercent.toFixed(2) %>%)
+                </h4>
+              </div>
+              <p class="text-muted">As of <%= new Date(quote.regularMarketTime * 1000).toLocaleString() %></p>
+              
+              <% if (userOwnsStock && holdings) { %>
+                <div class="alert alert-info mt-3">
+                  <h5>Your Holdings</h5>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <p class="mb-1">Shares Owned: <strong><%= holdings.totalShares.toFixed(2) %></strong></p>
+                      <p class="mb-1">Avg. Purchase Price: <strong>₹<%= holdings.avgPurchasePrice.toFixed(2) %></strong></p>
+                      <p class="mb-1">Total Investment: <strong>₹<%= holdings.totalInvestment.toFixed(2) %></strong></p>
+                    </div>
+                    <div class="col-md-6">
+                      <p class="mb-1">Current Value: <strong>₹<%= holdings.currentValue.toFixed(2) %></strong></p>
+                      <p class="mb-1">Gain/Loss: 
+                        <strong class="<%= holdings.gain >= 0 ? 'text-success' : 'text-danger' %>">
+                          ₹<%= holdings.gain.toFixed(2) %>
+                          (<%= holdings.gain >= 0 ? '+' : '' %><%= holdings.gainPercentage.toFixed(2) %>%)
+                        </strong>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="row">
+                <div class="col-md-6">
+                  <p class="mb-1">Previous Close: <strong>₹<%= quote.regularMarketPreviousClose.toFixed(2) %></strong></p>
+                  <p class="mb-1">Open: <strong>₹<%= quote.regularMarketOpen.toFixed(2) %></strong></p>
+                  <p class="mb-1">Day's Range: <strong>₹<%= quote.regularMarketDayLow.toFixed(2) %> - ₹<%= quote.regularMarketDayHigh.toFixed(2) %></strong></p>
+                  <p class="mb-1">52 Week Range: <strong>₹<%= quote.fiftyTwoWeekLow.toFixed(2) %> - ₹<%= quote.fiftyTwoWeekHigh.toFixed(2) %></strong></p>
+                </div>
+                <div class="col-md-6">
+                  <p class="mb-1">Volume: <strong><%= (quote.regularMarketVolume / 1000000).toFixed(2) %> M</strong></p>
+                  <p class="mb-1">Avg. Volume: <strong><%= (quote.averageDailyVolume3Month / 1000000).toFixed(2) %> M</strong></p>
+                  <p class="mb-1">Market Cap: <strong>₹<%= (quote.marketCap / 10000000).toFixed(2) %> Cr</strong></p>
+                  <% if (summaryDetail && summaryDetail.dividendYield && summaryDetail.dividendYield.raw) { %>
+                    <p class="mb-1">Dividend Yield: <strong><%= (summaryDetail.dividendYield.raw * 100).toFixed(2) %>%</strong></p>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Chart Controls -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <ul class="nav nav-tabs card-header-tabs" id="chartTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="historical-tab" data-bs-toggle="tab" data-bs-target="#historical" type="button" role="tab" aria-controls="historical" aria-selected="true">Historical</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="realtime-tab" data-bs-toggle="tab" data-bs-target="#realtime" type="button" role="tab" aria-controls="realtime" aria-selected="false">Real-Time</button>
+                </li>
+              </ul>
+            </div>
+            <div class="card-body">
+              <div class="tab-content" id="chartTabContent">
+                <!-- Historical Chart Tab -->
+                <div class="tab-pane fade show active" id="historical" role="tabpanel" aria-labelledby="historical-tab">
+                  <div class="btn-group mb-3" role="group" aria-label="Time Period">
+                    <button type="button" class="btn btn-outline-primary" data-period="1d">1D</button>
+                    <button type="button" class="btn btn-outline-primary" data-period="5d">5D</button>
+                    <button type="button" class="btn btn-outline-primary" data-period="1m">1M</button>
+                    <button type="button" class="btn btn-outline-primary" data-period="3m">3M</button>
+                    <button type="button" class="btn btn-outline-primary active" data-period="6m">6M</button>
+                    <button type="button" class="btn btn-outline-primary" data-period="1y">1Y</button>
+                    <button type="button" class="btn btn-outline-primary" data-period="5y">5Y</button>
+                    <button type="button" class="btn btn-outline-primary" data-period="max">Max</button>
+                  </div>
+                  <div class="chart-container" style="position: relative; height: 400px;">
+                    <canvas id="historicalChart"></canvas>
+                  </div>
+                </div>
+                
+                <!-- Real-Time Chart Tab -->
+                <div class="tab-pane fade" id="realtime" role="tabpanel" aria-labelledby="realtime-tab">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                      <span class="badge bg-primary me-2">Real-Time Updates</span>
+                      <small class="text-muted">Last updated: <span id="lastUpdateTime">-</span></small>
+                    </div>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="autoUpdateToggle" checked>
+                      <label class="form-check-label" for="autoUpdateToggle">Auto-update</label>
+                    </div>
+                  </div>
+                  <div class="chart-container" style="position: relative; height: 400px;">
+                    <canvas id="realtimeChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          
+          
+          <!-- Historical Data Table -->
+          <div class="card">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Historical Data</h5>
+              <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#historicalDataCollapse" aria-expanded="false" aria-controls="historicalDataCollapse">
+                Show/Hide
+              </button>
+            </div>
+            <div class="collapse" id="historicalDataCollapse">
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-sm table-hover">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Open</th>
+                        <th>High</th>
+                        <th>Low</th>
+                        <th>Close</th>
+                        <th>Adj Close</th>
+                        <th>Volume</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% historical.slice(0, 20).forEach(day => { %>
+                        <tr>
+                          <td><%= new Date(day.date).toLocaleDateString() %></td>
+                          <td>₹<%= day.open.toFixed(2) %></td>
+                          <td>₹<%= day.high.toFixed(2) %></td>
+                          <td>₹<%= day.low.toFixed(2) %></td>
+                          <td>₹<%= day.close.toFixed(2) %></td>
+                          <td>₹<%= day.adjClose.toFixed(2) %></td>
+                          <td><%= (day.volume / 1000000).toFixed(2) %> M</td>
+                        </tr>
+                      <% }); %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@2.0.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.2.1"></script>
+
+<script>
+  // Global variables
+  let historicalChart;
+  let realtimeChart;
+  let realtimeData = [];
+  let updateInterval;
+  const symbol = '<%= symbol %>';
+  const exchange = '<%= exchange %>';
+  const yahooSymbol = exchange === 'NSE' ? `${symbol}.NS` : `${symbol}.BO`;
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize historical chart with default period (6m)
+    fetchHistoricalData('6m');
+    
+    // Add event listeners to period buttons
+    document.querySelectorAll('[data-period]').forEach(button => {
+      button.addEventListener('click', function() {
+        // Update active button
+        document.querySelectorAll('[data-period]').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Fetch data for selected period
+        fetchHistoricalData(this.getAttribute('data-period'));
+      });
+    });
+    
+    // Handle realtime tab activation
+    document.getElementById('realtime-tab').addEventListener('click', function() {
+      if (!realtimeChart) {
+        initRealtimeChart();
+      }
+      
+      // Start updates if auto-update is enabled
+      if (document.getElementById('autoUpdateToggle').checked) {
+        startRealtimeUpdates();
+      }
+    });
+    
+    // Handle historical tab activation
+    document.getElementById('historical-tab').addEventListener('click', function() {
+      // Stop realtime updates when switching to historical tab
+      stopRealtimeUpdates();
+    });
+    
+    // Toggle auto-update
+    document.getElementById('autoUpdateToggle').addEventListener('change', function() {
+      if (this.checked) {
+        startRealtimeUpdates();
+      } else {
+        stopRealtimeUpdates();
+      }
+    });
+  });
+  
+  // Fetch historical data for the selected period
+  function fetchHistoricalData(period) {
+    fetch(`/api/stock/${symbol}/historical?exchange=${exchange}&period=${period}`)
+      .then(response => response.json())
+      .then(data => {
+        createHistoricalChart(data, period);
+      })
+      .catch(error => {
+        console.error('Error fetching historical data:', error);
+        alert('Error fetching historical data. Please try again later.');
+      });
+  }
+  
+  // Create historical chart
+  function createHistoricalChart(data, period) {
+    // Sort data by date (ascending)
+    data.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // Prepare data for chart
+    const dates = data.map(day => new Date(day.date));
+    const prices = data.map(day => day.close);
+    const volumes = data.map(day => day.volume);
+    
+    // Prepare OHLC data for candlestick chart
+    const ohlc = data.map(day => ({
+      x: new Date(day.date),
+      o: day.open,
+      h: day.high,
+      l: day.low,
+      c: day.close
+    }));
+    
+    // Destroy existing chart if it exists
+    if (historicalChart) {
+      historicalChart.destroy();
+    }
+    
+    // Create chart
+    const ctx = document.getElementById('historicalChart').getContext('2d');
+    
+    // Determine if we should use candlesticks (for daily data) or line chart (for intraday)
+    const isIntraday = period === '1d' || period === '5d';
+    
+    historicalChart = new Chart(ctx, {
+      type: isIntraday ? 'line' : 'bar',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: 'Price',
+          data: prices,
+          borderColor: '#0d6efd',
+          backgroundColor: 'rgba(13, 110, 253, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.1,
+          yAxisID: 'y',
+          pointRadius: isIntraday ? 1 : 0,
+          pointHoverRadius: 5
+        }, {
+          label: 'Volume',
+          data: volumes,
+          borderColor: 'rgba(75, 192, 192, 0.7)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderWidth: 1,
+          type: 'bar',
+          yAxisID: 'y1'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: getTimeUnit(period),
+              displayFormats: {
+                minute: 'HH:mm',
+                hour: 'HH:mm',
+                day: 'MMM d',
+                week: 'MMM d',
+                month: 'MMM yyyy',
+                year: 'yyyy'
+              }
+            },
+            grid: {
+              display: false
+            }
+          },
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            title: {
+              display: true,
+              text: 'Price (₹)'
+            }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            grid: {
+              drawOnChartArea: false
+            },
+            title: {
+              display: true,
+              text: 'Volume'
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.datasetIndex === 0) {
+                  label += '₹' + context.parsed.y.toFixed(2);
+                } else {
+                  label += context.parsed.y.toLocaleString();
+                }
+                return label;
+              }
+            }
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'x'
+            },
+            zoom: {
+              wheel: {
+                enabled: true
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'x'
+            }
+          }
+        }
+      }
+    });
+  }
+  
+  // Initialize realtime chart
+  function initRealtimeChart() {
+    const ctx = document.getElementById('realtimeChart').getContext('2d');
+    
+    // Initialize with empty data
+    realtimeData = [];
+    
+    realtimeChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: 'Price',
+          data: realtimeData,
+          borderColor: '#0d6efd',
+          backgroundColor: 'rgba(13, 110, 253, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'minute',
+              displayFormats: {
+                minute: 'HH:mm:ss'
+              }
+            },
+            grid: {
+              display: false
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Price (₹)'
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `Price: ₹${context.parsed.y.toFixed(2)}`;
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Get initial data
+    updateRealtimeData();
+  }
+  
+  // Start realtime updates
+  function startRealtimeUpdates() {
+    // Clear any existing interval
+    stopRealtimeUpdates();
+    
+    // Update immediately
+    updateRealtimeData();
+    
+    // Set interval for updates (every 10 seconds)
+    updateInterval = setInterval(updateRealtimeData, 10000);
+  }
+  
+  // Stop realtime updates
+  function stopRealtimeUpdates() {
+    if (updateInterval) {
+      clearInterval(updateInterval);
+      updateInterval = null;
+    }
+  }
+  
+  // Update realtime data
+  function updateRealtimeData() {
+    fetch(`/api/stock/${symbol}/realtime?exchange=${exchange}`)
+      .then(response => response.json())
+      .then(data => {
+        // Add new data point
+        realtimeData.push({
+          x: new Date(),
+          y: data.price
+        });
+        
+        // Keep only the last 60 points (10 minutes at 10-second intervals)
+        if (realtimeData.length > 60) {
+          realtimeData = realtimeData.slice(-60);
+        }
+        
+        // Update chart
+        realtimeChart.data.datasets[0].data = realtimeData;
+        realtimeChart.update();
+        
+        // Update last update time
+        document.getElementById('lastUpdateTime').textContent = new Date().toLocaleTimeString();
+      })
+      .catch(error => {
+        console.error('Error fetching realtime data:', error);
+      });
+  }
+  
+  // Helper function to determine time unit based on period
+  function getTimeUnit(period) {
+    switch(period) {
+      case '1d':
+        return 'minute';
+      case '5d':
+        return 'hour';
+      case '1m':
+      case '3m':
+        return 'day';
+      case '6m':
+      case '1y':
+        return 'week';
+      case '5y':
+        return 'month';
+      case 'max':
+        return 'year';
+      default:
+        return 'day';
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>
