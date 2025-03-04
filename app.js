@@ -127,6 +127,9 @@ app.use('/', authRoutes);
 
 // Routes
 app.get('/', (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.redirect('/dashboard');
+  }
   res.render('login', { title: 'Login'});
 });
 
@@ -1759,7 +1762,7 @@ async function generatePdf(content, outputPath, user) {
       
       doc.moveDown(2);
       
-      // Process content from Gemini - with improved section handling
+      // Process content from Gemini
       const sections = content.split(/\n\s*\n/);
       
       sections.forEach(section => {
@@ -2097,7 +2100,7 @@ app.get('/api/stock/:symbol/realtime', ensureAuthenticated, async (req, res) => 
       change: quote.regularMarketChange,
       changePercent: quote.regularMarketChangePercent,
       volume: quote.regularMarketVolume,
-      time: quote.regularMarketTime * 1000, // Convert to milliseconds
+      time: quote.regularMarketTime, // Convert to milliseconds
       previousClose: quote.regularMarketPreviousClose,
       open: quote.regularMarketOpen,
       dayHigh: quote.regularMarketDayHigh,
@@ -2183,6 +2186,126 @@ app.get('/mutualfund', ensureAuthenticated, (req, res) => {
 });
 
 
+// Income Tax Calculator Route
+app.get('/tax-calculator', ensureAuthenticated, (req, res) => {
+  res.render('tax-calculator', {
+    title: 'Income Tax Calculator'
+    
+  });
+});
+
+
+// Route for Income Tax Return PDF Generator
+app.get('/itr-generator', ensureAuthenticated, (req, res) => {
+  res.render('itr-generator', {
+    title: 'Income Tax Return PDF Generator',
+  });
+});
+
+// API endpoint to generate PDF
+app.post('/api/generate-tax-return', ensureAuthenticated, async (req, res) => {
+  try {
+    const { personalInfo, incomeDetails, deductions, taxPaid } = req.body;
+    
+    // Generate PDF using PDFKit
+    
+    const doc = new PDFDocument();
+    
+    // Set response headers for PDF download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=ITR-${personalInfo.panNumber}.pdf`);
+    
+    // Pipe PDF to response
+    doc.pipe(res);
+    
+    // Add content to PDF
+    generateTaxReturnPDF(doc, personalInfo, incomeDetails, deductions, taxPaid);
+    
+    // Finalize PDF
+    doc.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error generating tax return PDF' });
+  }
+});
+
+// Function to generate tax return PDF
+function generateTaxReturnPDF(doc, personalInfo, incomeDetails, deductions, taxPaid) {
+  // Add header
+  doc.fontSize(20).text('INCOME TAX RETURN', { align: 'center' });
+  doc.moveDown();
+  doc.fontSize(12).text(`Assessment Year: ${personalInfo.assessmentYear}`, { align: 'center' });
+  doc.moveDown(2);
+  
+  // Add personal information
+  doc.fontSize(16).text('Personal Information', { underline: true });
+  doc.moveDown();
+  doc.fontSize(12).text(`Name: ${personalInfo.name}`);
+  doc.text(`PAN: ${personalInfo.panNumber}`);
+  doc.text(`Date of Birth: ${personalInfo.dateOfBirth}`);
+  doc.text(`Address: ${personalInfo.address}`);
+  doc.text(`Mobile: ${personalInfo.mobile}`);
+  doc.text(`Email: ${personalInfo.email}`);
+  doc.moveDown(2);
+  
+  // Add income details
+  doc.fontSize(16).text('Income Details', { underline: true });
+  doc.moveDown();
+  doc.fontSize(12).text(`Salary Income: ₹${incomeDetails.salary.toLocaleString('en-IN')}`);
+  doc.text(`Interest Income: ₹${incomeDetails.interest.toLocaleString('en-IN')}`);
+  doc.text(`Rental Income: ₹${incomeDetails.rental.toLocaleString('en-IN')}`);
+  doc.text(`Business Income: ₹${incomeDetails.business.toLocaleString('en-IN')}`);
+  doc.text(`Capital Gains: ₹${incomeDetails.capitalGains.toLocaleString('en-IN')}`);
+  doc.text(`Other Income: ₹${incomeDetails.other.toLocaleString('en-IN')}`);
+  
+  const totalIncome = Object.values(incomeDetails).reduce((sum, val) => sum + val, 0);
+  doc.fontSize(14).text(`Gross Total Income: ₹${totalIncome.toLocaleString('en-IN')}`, { bold: true });
+  doc.moveDown(2);
+  
+  // Add deductions
+  doc.fontSize(16).text('Deductions', { underline: true });
+  doc.moveDown();
+  doc.fontSize(12).text(`Section 80C: ₹${deductions.section80C.toLocaleString('en-IN')}`);
+  doc.text(`Section 80D: ₹${deductions.section80D.toLocaleString('en-IN')}`);
+  doc.text(`Section 80G: ₹${deductions.section80G.toLocaleString('en-IN')}`);
+  doc.text(`Housing Loan Interest: ₹${deductions.housingLoan.toLocaleString('en-IN')}`);
+  doc.text(`Other Deductions: ₹${deductions.other.toLocaleString('en-IN')}`);
+  
+  const totalDeductions = Object.values(deductions).reduce((sum, val) => sum + val, 0);
+  doc.fontSize(14).text(`Total Deductions: ₹${totalDeductions.toLocaleString('en-IN')}`, { bold: true });
+  doc.moveDown();
+  
+  const taxableIncome = totalIncome - totalDeductions;
+  doc.fontSize(14).text(`Taxable Income: ₹${taxableIncome.toLocaleString('en-IN')}`, { bold: true });
+  doc.moveDown(2);
+  
+  // Add tax paid details
+  doc.fontSize(16).text('Tax Paid Details', { underline: true });
+  doc.moveDown();
+  doc.fontSize(12).text(`TDS on Salary: ₹${taxPaid.tdsSalary.toLocaleString('en-IN')}`);
+  doc.text(`TDS on Interest: ₹${taxPaid.tdsInterest.toLocaleString('en-IN')}`);
+  doc.text(`TDS on Other Income: ₹${taxPaid.tdsOther.toLocaleString('en-IN')}`);
+  doc.text(`Advance Tax: ₹${taxPaid.advanceTax.toLocaleString('en-IN')}`);
+  doc.text(`Self-Assessment Tax: ₹${taxPaid.selfAssessment.toLocaleString('en-IN')}`);
+  
+  const totalTaxPaid = Object.values(taxPaid).reduce((sum, val) => sum + val, 0);
+  doc.fontSize(14).text(`Total Tax Paid: ₹${totalTaxPaid.toLocaleString('en-IN')}`, { bold: true });
+  doc.moveDown(2);
+  
+  // Add verification
+  doc.fontSize(16).text('Verification', { underline: true });
+  doc.moveDown();
+  doc.fontSize(12).text('I declare that to the best of my knowledge and belief, the information furnished in this return is correct, complete and truly stated.');
+  doc.moveDown(2);
+  
+  doc.text(`Date: ${new Date().toLocaleDateString()}`);
+  doc.moveDown();
+  doc.text('Signature: ____________________');
+  doc.text(`(${personalInfo.name})`);
+}
+
+
+
 
 
 
@@ -2192,7 +2315,7 @@ const { scheduleEmailReminders } = require('./schedulers/emailReminders');
 
 // Start the scheduler when the app starts
 
-  scheduleEmailReminders();
+scheduleEmailReminders();
 
 
 

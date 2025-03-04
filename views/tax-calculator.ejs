@@ -1,0 +1,189 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h3 class="mb-0"><i class="bi bi-receipt me-2"></i>Income Tax Calculator (FY 2024-25)</h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h5 class="mb-0">Tax Regime Selection</h5>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label class="form-label">Choose Tax Regime</label>
+                    <div class="btn-group w-100" role="group">
+                      <input type="radio" class="btn-check" name="taxRegime" id="newRegime" value="new" checked>
+                      <label class="btn btn-outline-primary" for="newRegime">New Regime</label>
+                      
+                      <input type="radio" class="btn-check" name="taxRegime" id="oldRegime" value="old">
+                      <label class="btn btn-outline-primary" for="oldRegime">Old Regime</label>
+                    </div>
+                    <div class="form-text">New regime has lower tax rates but fewer deductions.</div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label class="form-label">Age Group</label>
+                    <select class="form-select" id="ageGroup">
+                      <option value="general">Below 60 years</option>
+                      <option value="senior">60 to 80 years</option>
+                      <option value="superSenior">Above 80 years</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h5 class="mb-0">Income Details</h5>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label for="salary" class="form-label">Salary Income</label>
+                    <div class="input-group">
+                      <span class="input-group-text">₹</span>
+                      <input type="number" class="form-control" id="salary" placeholder="Annual salary before deductions">
+                    </div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="otherIncome" class="form-label">Other Income</label>
+                    <div class="input-group">
+                      <span class="input-group-text">₹</span>
+                      <input type="number" class="form-control" id="otherIncome" placeholder="Interest, rental income, etc.">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="oldRegimeDeductions" class="card mb-4" style="display: none;">
+                <div class="card-header">
+                  <h5 class="mb-0">Deductions & Exemptions (Old Regime)</h5>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <label for="standardDeduction" class="form-label">Standard Deduction</label>
+                    <div class="input-group">
+                      <span class="input-group-text">₹</span>
+                      <input type="number" class="form-control" id="standardDeduction" value="50000" readonly>
+                    </div>
+                    <div class="form-text">Fixed standard deduction for salaried individuals.</div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="section80C" class="form-label">Section 80C (Max ₹1,50,000)</label>
+                    <div class="input-group">
+                      <span class="input-group-text">₹</span>
+                      <input type="number" class="form-control" id="section80C" placeholder="PPF, ELSS, LIC, etc.">
+                    </div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="section80D" class="form-label">Section 80D - Medical Insurance</label>
+                    <div class="input-group">
+                      <span class="input-group-text">₹</span>
+                      <input type="number" class="form-control" id="section80D" placeholder="Health insurance premium">
+                    </div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="housingLoan" class="form-label">Housing Loan Interest</label>
+                    <div class="input-group">
+                      <span class="input-group-text">₹</span>
+                      <input type="number" class="form-control" id="housingLoan" placeholder="Interest paid on housing loan">
+                    </div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="otherDeductions" class="form-label">Other Deductions</label>
+                    <div class="input-group">
+                      <span class="input-group-text">₹</span>
+                      <input type="number" class="form-control" id="otherDeductions" placeholder="80G, 80E, NPS, etc.">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="d-grid">
+                <button id="calculateTaxBtn" class="btn btn-primary">Calculate Tax</button>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div id="resultSection" class="card" style="display: none;">
+                <div class="card-header bg-dark text-white">
+                  <h5 class="mb-0">Tax Calculation Results</h5>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-bordered">
+                      <tbody>
+                        <tr>
+                          <th>Gross Total Income</th>
+                          <td id="grossIncome">₹0</td>
+                        </tr>
+                        <tr id="deductionsRow" style="display: none;">
+                          <th>Total Deductions</th>
+                          <td id="totalDeductions">₹0</td>
+                        </tr>
+                        <tr>
+                          <th>Taxable Income</th>
+                          <td id="taxableIncome">₹0</td>
+                        </tr>
+                        <tr>
+                          <th>Income Tax</th>
+                          <td id="incomeTax">₹0</td>
+                        </tr>
+                        <tr>
+                          <th>Health & Education Cess (4%)</th>
+                          <td id="cess">₹0</td>
+                        </tr>
+                        <tr class="table-primary">
+                          <th>Total Tax Liability</th>
+                          <td id="totalTax" class="fw-bold">₹0</td>
+                        </tr>
+                        <tr>
+                          <th>Effective Tax Rate</th>
+                          <td id="effectiveTaxRate">0%</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div class="mt-4">
+                    <h5>Tax Breakdown</h5>
+                    <div id="taxSlabBreakdown"></div>
+                  </div>
+                  
+                  <div class="mt-4">
+                    <canvas id="taxChart" height="250"></canvas>
+                  </div>
+                  
+                  <div class="alert alert-info mt-4">
+                    <h6><i class="bi bi-info-circle"></i> Tax Regime Comparison</h6>
+                    <div id="regimeComparison"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/incometaxcalc.js"></script>
+
+<%- include('partials/footer') %>
+
+
+  
+
+

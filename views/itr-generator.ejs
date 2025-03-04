@@ -1,0 +1,292 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h3 class="mb-0"><i class="bi bi-file-earmark-pdf me-2"></i>Income Tax Return PDF Generator</h3>
+        </div>
+        <div class="card-body">
+          <form id="taxReturnForm">
+            <div class="row">
+              <!-- Personal Information -->
+              <div class="col-md-12 mb-4">
+                <div class="card">
+                  <div class="card-header bg-light">
+                    <h5 class="mb-0">Personal Information</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="personalInfo.name" required>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label for="panNumber" class="form-label">PAN Number</label>
+                        <input type="text" class="form-control" id="panNumber" name="personalInfo.panNumber" required>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control" id="dateOfBirth" name="personalInfo.dateOfBirth" required>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label for="assessmentYear" class="form-label">Assessment Year</label>
+                        <select class="form-select" id="assessmentYear" name="personalInfo.assessmentYear" required>
+                          <option value="2024-25">2024-25</option>
+                          <option value="2023-24">2023-24</option>
+                          <option value="2022-23">2022-23</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="address" class="form-label">Address</label>
+                      <textarea class="form-control" id="address" name="personalInfo.address" rows="2" required></textarea>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label for="mobile" class="form-label">Mobile Number</label>
+                        <input type="tel" class="form-control" id="mobile" name="personalInfo.mobile" required>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="personalInfo.email" required>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Income Details -->
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-header bg-light">
+                    <h5 class="mb-0">Income Details</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label for="salary" class="form-label">Salary Income</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="salary" name="incomeDetails.salary" value="0">
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="interest" class="form-label">Interest Income</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="interest" name="incomeDetails.interest" value="0">
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="rental" class="form-label">Rental Income</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="rental" name="incomeDetails.rental" value="0">
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="business" class="form-label">Business Income</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="business" name="incomeDetails.business" value="0">
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="capitalGains" class="form-label">Capital Gains</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="capitalGains" name="incomeDetails.capitalGains" value="0">
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="otherIncome" class="form-label">Other Income</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="otherIncome" name="incomeDetails.other" value="0">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Deductions -->
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-header bg-light">
+                    <h5 class="mb-0">Deductions</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label for="section80C" class="form-label">Section 80C (Max ₹1,50,000)</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="section80C" name="deductions.section80C" value="0">
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="section80D" class="form-label">Section 80D - Medical Insurance</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="section80D" name="deductions.section80D" value="0">
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="section80G" class="form-label">Section 80G - Donations</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="section80G" name="deductions.section80G" value="0">
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="housingLoan" class="form-label">Housing Loan Interest</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="housingLoan" name="deductions.housingLoan" value="0">
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="otherDeductions" class="form-label">Other Deductions</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="otherDeductions" name="deductions.other" value="0">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Tax Paid Details -->
+              <div class="col-md-12 mb-4">
+                <div class="card">
+                  <div class="card-header bg-light">
+                    <h5 class="mb-0">Tax Paid Details</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
+                        <label for="tdsSalary" class="form-label">TDS on Salary</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₹</span>
+                          <input type="number" class="form-control" id="tdsSalary" name="taxPaid.tdsSalary" value="0">
+                        </div>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label for="tdsInterest" class="form-label">TDS on Interest</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₹</span>
+                          <input type="number" class="form-control" id="tdsInterest" name="taxPaid.tdsInterest" value="0">
+                        </div>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label for="tdsOther" class="form-label">TDS on Other Income</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₹</span>
+                          <input type="number" class="form-control" id="tdsOther" name="taxPaid.tdsOther" value="0">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label for="advanceTax" class="form-label">Advance Tax</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₹</span>
+                          <input type="number" class="form-control" id="advanceTax" name="taxPaid.advanceTax" value="0">
+                        </div>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label for="selfAssessment" class="form-label">Self-Assessment Tax</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₹</span>
+                          <input type="number" class="form-control" id="selfAssessment" name="taxPaid.selfAssessment" value="0">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Generate ITR PDF</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const taxReturnForm = document.getElementById('taxReturnForm');
+      
+      taxReturnForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Collect form data
+        const formData = {};
+        const formElements = taxReturnForm.elements;
+        
+        for (let i = 0; i < formElements.length; i++) {
+          const element = formElements[i];
+          if (element.name && element.name !== '') {
+            // Handle nested objects (e.g., personalInfo.name)
+            const nameParts = element.name.split('.');
+            if (nameParts.length > 1) {
+              if (!formData[nameParts[0]]) {
+                formData[nameParts[0]] = {};
+              }
+              formData[nameParts[0]][nameParts[1]] = element.type === 'number' ? 
+                parseFloat(element.value) || 0 : element.value;
+            } else {
+              formData[element.name] = element.type === 'number' ? 
+                parseFloat(element.value) || 0 : element.value;
+            }
+          }
+        }
+        
+        // Send data to server
+        fetch('/api/generate-tax-return', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        })
+        .then(response => {
+          if (response.ok) {
+            // Create a blob from the PDF stream
+            return response.blob();
+          }
+          throw new Error('Error generating PDF');
+        })
+        .then(blob => {
+          // Create a link to download the PDF
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = `ITR-${formData.personalInfo.panNumber}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error generating tax return PDF. Please try again.');
+        });
+      });
+      
+      // Pre-fill form with user data if available
+      if (typeof userData !== 'undefined') {
+        document.getElementById('name').value = userData.fullName || '';
+        document.getElementById('email').value = userData.email || '';
+        // Add more pre-fill logic as needed
+      }
+    });
+  </script>
+  
+  

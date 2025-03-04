@@ -20,6 +20,19 @@
           </button>
         </div>
         <div class="card-body">
+
+            <div class="card-body bg-white ">
+                <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+                  <div class="alert alert-success" role="alert" >
+                    <%= success %>
+                  </div>
+                <% } %>
+                <div class="card-body bg-white ">
+                    <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+                      <div class="alert alert-success" role="alert" >
+                        <%= error %>
+                      </div>
+                    <% } %>
           <!-- Exchange Selector -->
           <ul class="nav nav-tabs mb-4">
             <li class="nav-item">
@@ -220,6 +233,8 @@
         </div>
       </form>
     </div>
+  </div>
+</div>
   </div>
 </div>
 
