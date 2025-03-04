@@ -1373,9 +1373,6 @@ header{
     margin: 5px; /* Smaller margins on very small screens */
   }
 }
-#chartTabContent .btn.active {
-  background-color: #055361;
-  border-color: #055361;
 
-} 
+
 

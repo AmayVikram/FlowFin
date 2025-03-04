@@ -4,29 +4,31 @@
   <div class="row mb-4">
     <div class="col-md-12">
       <div class="card shadow">
-        <div class="card-header bg-primary text-white ">
-          <h3 class="mb-0" style=" text-align: cneter; font-family: Roboto; color: white;font-size: 1.8 rem;"><i class="bi bi-receipt me-2"></i>Income Tax Calculator (FY 2024-25)</h3>
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h3 class="mb-0"><i class="bi bi-receipt me-2"></i>Income Tax Calculator (FY 2024-25)</h3>
         </div>
         <div class="card-body">
           <div class="row">
             <div class="col-md-6">
               <div class="card mb-4">
                 <div class="card-header">
-                  <h5 class="mb-0"style=" text-align: cneter; font-family: Roboto; color: white;font-size: 1.8 rem;">Tax Regime Selection</h5>
+                  <h5 class="mb-0">Tax Regime Selection</h5>
                 </div>
                 <div class="card-body">
                   <div class="mb-3">
-                    <label class="form-label"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">Choose Tax Regime</label>
+                    <label class="form-label">Choose Tax Regime</label>
                     <div class="btn-group w-100" role="group">
                       <input type="radio" class="btn-check" name="taxRegime" id="newRegime" value="new" checked>
-                      <label class="btn btn-outline-primary" for="newRegime" style=" text-align: cneter; font-family: Roboto; color: black;font-size: 1.8 rem;">New Regime</label>
+                      <label class="btn btn-outline-primary" for="newRegime">New Regime</label>
+                      
                       <input type="radio" class="btn-check" name="taxRegime" id="oldRegime" value="old">
-                      <label class="btn btn-outline-primary" for="oldRegime" style=" text-align: cneter; font-family: Roboto; color: black;font-size: 1.8 rem;">Old Regime</label>
+                      <label class="btn btn-outline-primary" for="oldRegime">Old Regime</label>
                     </div>
-                    <div class="form-text"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">New regime has lower tax rates but fewer deductions.</div>
+                    <div class="form-text">New regime has lower tax rates but fewer deductions.</div>
                   </div>
+                  
                   <div class="mb-3">
-                    <label class="form-label"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">Age Group</label>
+                    <label class="form-label">Age Group</label>
                     <select class="form-select" id="ageGroup">
                       <option value="general">Below 60 years</option>
                       <option value="senior">60 to 80 years</option>
@@ -38,11 +40,11 @@
               
               <div class="card mb-4">
                 <div class="card-header">
-                  <h5 class="mb-0"style=" text-align: cneter; font-family: Roboto; color: white;font-size: 1.8 rem;">Income Details</h5>
+                  <h5 class="mb-0">Income Details</h5>
                 </div>
                 <div class="card-body">
                   <div class="mb-3">
-                    <label for="salary" class="form-label"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">Salary Income(Annual)</label>
+                    <label for="salary" class="form-label">Salary Income</label>
                     <div class="input-group">
                       <span class="input-group-text">₹</span>
                       <input type="number" class="form-control" id="salary" placeholder="Annual salary before deductions">
@@ -50,7 +52,7 @@
                   </div>
                   
                   <div class="mb-3">
-                    <label for="otherIncome" class="form-label"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">Other Income</label>
+                    <label for="otherIncome" class="form-label">Other Income</label>
                     <div class="input-group">
                       <span class="input-group-text">₹</span>
                       <input type="number" class="form-control" id="otherIncome" placeholder="Interest, rental income, etc.">
@@ -61,20 +63,20 @@
               
               <div id="oldRegimeDeductions" class="card mb-4" style="display: none;">
                 <div class="card-header">
-                  <h5 class="mb-0"style=" text-align: cneter; font-family: Roboto; color: white;font-size: 1.8 rem;">Deductions & Exemptions (Old Regime)</h5>
+                  <h5 class="mb-0">Deductions & Exemptions (Old Regime)</h5>
                 </div>
                 <div class="card-body">
                   <div class="mb-3">
-                    <label for="standardDeduction" class="form-label"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">Standard Deduction</label>
+                    <label for="standardDeduction" class="form-label">Standard Deduction</label>
                     <div class="input-group">
                       <span class="input-group-text">₹</span>
                       <input type="number" class="form-control" id="standardDeduction" value="50000" readonly>
                     </div>
-                    <div class="form-text"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">Fixed standard deduction for salaried individuals.</div>
+                    <div class="form-text">Fixed standard deduction for salaried individuals.</div>
                   </div>
                   
                   <div class="mb-3">
-                    <label for="section80C" class="form-label"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">Section 80C (Max ₹1,50,000)</label>
+                    <label for="section80C" class="form-label">Section 80C (Max ₹1,50,000)</label>
                     <div class="input-group">
                       <span class="input-group-text">₹</span>
                       <input type="number" class="form-control" id="section80C" placeholder="PPF, ELSS, LIC, etc.">
@@ -82,7 +84,7 @@
                   </div>
                   
                   <div class="mb-3">
-                    <label for="section80D" class="form-label"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">Section 80D - Medical Insurance</label>
+                    <label for="section80D" class="form-label">Section 80D - Medical Insurance</label>
                     <div class="input-group">
                       <span class="input-group-text">₹</span>
                       <input type="number" class="form-control" id="section80D" placeholder="Health insurance premium">
@@ -90,7 +92,7 @@
                   </div>
                   
                   <div class="mb-3">
-                    <label for="housingLoan" class="form-label"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">Housing Loan Interest</label>
+                    <label for="housingLoan" class="form-label">Housing Loan Interest</label>
                     <div class="input-group">
                       <span class="input-group-text">₹</span>
                       <input type="number" class="form-control" id="housingLoan" placeholder="Interest paid on housing loan">
@@ -98,7 +100,7 @@
                   </div>
                   
                   <div class="mb-3">
-                    <label for="otherDeductions" class="form-label"style=" text-align: cneter; font-family: Poppins;font-size: 1.4 rem;">Other Deductions</label>
+                    <label for="otherDeductions" class="form-label">Other Deductions</label>
                     <div class="input-group">
                       <span class="input-group-text">₹</span>
                       <input type="number" class="form-control" id="otherDeductions" placeholder="80G, 80E, NPS, etc.">
@@ -183,4 +185,5 @@
 
 
   
+
 
