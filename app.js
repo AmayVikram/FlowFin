@@ -2176,10 +2176,9 @@ app.get('/api/stock/:symbol/historical', ensureAuthenticated, async (req, res) =
 // miscellaneous
 
 // Mutual Fund Calculator Route
-app.get('/mutual-fund-calculator', ensureAuthenticated, (req, res) => {
-  res.render('mutual-fund-calculator', {
-    title: 'Mutual Fund Return Calculator',
-    user: req.user
+app.get('/mutualfund', ensureAuthenticated, (req, res) => {
+  res.render('mutualfund', {
+    title: 'Mutual Fund Return Calculator'
   });
 });
 
