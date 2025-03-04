@@ -3,28 +3,21 @@
 <div class="container">
   <div class="row mb-4">
     <div class="col-md-12">
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <div>
-            <h3 class="mb-0">
-              <%= symbol %> <small class="text-light">(<%= exchange %>)</small>
-              <% if (quote.longName && quote.longName !== symbol) { %>
-                - <%= quote.longName %>
-              <% } %>
-            </h3>
-            
-          </div>
-          <div class="d-flex">
-           
-            
-            <a href="/portfolio?exchange=<%= exchange %>" class="btn btn-light">Back to Portfolio</a>
-          </div>
+      <!-- Stock Information Card -->
+      <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white text-center">
+          <h3 class="mb-0 p-2">
+            <%= symbol %> <small class="text-light">(<%= exchange %>)</small>
+            <% if (quote.longName && quote.longName !== symbol) { %>
+              - <%= quote.longName %>
+            <% } %>
+          </h3>
         </div>
         
-        <div class="card-body">
+        <div class="card-body p-4">
           <!-- Current Price and Stats -->
           <div class="row mb-4">
-            <div class="col-md-6">
+            <div class="col-md-6 p-3">
               <div class="d-flex align-items-baseline">
                 <h1 class="me-3">₹<%= quote.regularMarketPrice.toFixed(2) %></h1>
                 <h4 class="<%= quote.regularMarketChange >= 0 ? 'text-success' : 'text-danger' %>">
@@ -57,7 +50,7 @@
               <% } %>
             </div>
             
-            <div class="col-md-6">
+            <div class="col-md-6 p-3">
               <div class="row">
                 <div class="col-md-6">
                   <p class="mb-1">Previous Close: <strong>₹<%= quote.regularMarketPreviousClose.toFixed(2) %></strong></p>
@@ -76,106 +69,104 @@
               </div>
             </div>
           </div>
-          
-          <!-- Chart Controls -->
-          <div class="card mb-4">
-            <div class="card-header">
-              <ul class="nav nav-tabs card-header-tabs" id="chartTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="historical-tab" data-bs-toggle="tab" data-bs-target="#historical" type="button" role="tab" aria-controls="historical" aria-selected="true">Historical</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="realtime-tab" data-bs-toggle="tab" data-bs-target="#realtime" type="button" role="tab" aria-controls="realtime" aria-selected="false">Real-Time</button>
-                </li>
-              </ul>
-            </div>
-            <div class="card-body">
-              <div class="tab-content" id="chartTabContent">
-                <!-- Historical Chart Tab -->
-                <div class="tab-pane fade show active" id="historical" role="tabpanel" aria-labelledby="historical-tab">
-                  <div class="btn-group mb-3" role="group" aria-label="Time Period">
-                    <button type="button" class="btn btn-outline-primary" data-period="1m">1M</button>
-                    <button type="button" class="btn btn-outline-primary" data-period="3m">3M</button>
-                    <button type="button" class="btn btn-outline-primary active" data-period="6m">6M</button>
-                    <button type="button" class="btn btn-outline-primary" data-period="1y">1Y</button>
-                    <button type="button" class="btn btn-outline-primary" data-period="5y">5Y</button>
-                    <button type="button" class="btn btn-outline-primary" data-period="max">Max</button>
-                  </div>
-                  <div class="chart-container" style="position: relative; height: 400px;">
-                    <canvas id="historicalChart"></canvas>
-                  </div>
-                </div>
-                
-                <!-- Real-Time Chart Tab -->
-                <div class="tab-pane fade" id="realtime" role="tabpanel" aria-labelledby="realtime-tab">
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                      <span class="badge bg-primary me-2">Real-Time Updates</span>
-                      <small class="text-muted">Last updated: <span id="lastUpdateTime">-</span></small>
-                    </div>
-                    <div class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" id="autoUpdateToggle" checked>
-                      <label class="form-check-label" for="autoUpdateToggle">Auto-update</label>
-                    </div>
-                  </div>
-                  <div class="chart-container" style="position: relative; height: 400px;">
-                    <canvas id="realtimeChart"></canvas>
-                  </div>
+        </div>
+      </div>
+
+      <!-- Chart Card -->
+      <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white text-center">
+          <ul class="nav nav-tabs card-header-tabs justify-content-center border-0">
+            <li class="nav-item mx-2">
+              <button class="nav-link text-dark bg-white" id="historical-tab" data-bs-toggle="tab" data-bs-target="#historical" type="button">Historical</button>
+            </li>
+            <li class="nav-item mx-2">
+              <button class="nav-link text-dark bg-white" id="realtime-tab" data-bs-toggle="tab" data-bs-target="#realtime" type="button">Real-Time</button>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="tab-content" id="chartTabContent">
+            <!-- Historical Chart Tab -->
+            <div class="tab-pane fade show active" id="historical" role="tabpanel">
+              <div class="d-flex justify-content-center mb-3">
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-outline-primary" data-period="1m">1M</button>
+                  <button type="button" class="btn btn-outline-primary" data-period="3m">3M</button>
+                  <button type="button" class="btn btn-outline-primary" data-period="6m">6M</button>
+                  <button type="button" class="btn btn-outline-primary" data-period="1y">1Y</button>
+                  <button type="button" class="btn btn-outline-primary" data-period="5y">5Y</button>
+                  <button type="button" class="btn btn-outline-primary" data-period="max">Max</button>
                 </div>
               </div>
+              <div class="chart-container" style="position: relative; height: 400px;">
+                <canvas id="historicalChart"></canvas>
+              </div>
             </div>
-          </div>
-          
-          
-          
-          <!-- Historical Data Table -->
-          <div class="card">
-            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Historical Data</h5>
-              <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#historicalDataCollapse" aria-expanded="false" aria-controls="historicalDataCollapse">
-                Show/Hide
-              </button>
-            </div>
-            <div class="collapse" id="historicalDataCollapse">
-              <div class="card-body">
-                <div class="table-responsive">
-                  <table class="table table-sm table-hover">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Open</th>
-                        <th>High</th>
-                        <th>Low</th>
-                        <th>Close</th>
-                        <th>Adj Close</th>
-                        <th>Volume</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <% historical.slice(-20).reverse().forEach(day => { %>
-                        <tr>
-                          <td><%= new Date(day.date).toLocaleDateString() %></td>
-                          <td>₹<%= day.open.toFixed(2) %></td>
-                          <td>₹<%= day.high.toFixed(2) %></td>
-                          <td>₹<%= day.low.toFixed(2) %></td>
-                          <td>₹<%= day.close.toFixed(2) %></td>
-                          <td>₹<%= day.adjClose.toFixed(2) %></td>
-                          <td><%= (day.volume / 1000000).toFixed(2) %> M</td>
-                        </tr>
-                      <% }); %>
-                    </tbody>
-                  </table>
+            
+            <!-- Real-Time Chart Tab -->
+            <div class="tab-pane fade" id="realtime" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <span class="badge bg-primary me-2">Real-Time Updates</span>
+                  <small class="text-muted">Last updated: <span id="lastUpdateTime">-</span></small>
                 </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="autoUpdateToggle" checked>
+                  <label class="form-check-label" for="autoUpdateToggle">Auto-update</label>
+                </div>
+              </div>
+              <div class="chart-container" style="position: relative; height: 400px;">
+                <canvas id="realtimeChart"></canvas>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Historical Data Card -->
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white text-center">
+          <h5 class="mb-0">Historical Data</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Open</th>
+                  <th>High</th>
+                  <th>Low</th>
+                  <th>Close</th>
+                  <th>Adj Close</th>
+                  <th>Volume</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% historical.slice(-20).reverse().forEach(day => { %>
+                  <tr>
+                    <td><%= new Date(day.date).toLocaleDateString() %></td>
+                    <td>₹<%= day.open.toFixed(2) %></td>
+                    <td>₹<%= day.high.toFixed(2) %></td>
+                    <td>₹<%= day.low.toFixed(2) %></td>
+                    <td>₹<%= day.close.toFixed(2) %></td>
+                    <td>₹<%= day.adjClose.toFixed(2) %></td>
+                    <td><%= (day.volume / 1000000).toFixed(2) %> M</td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Return to Portfolio Button (Outside Card) -->
+      <div class="text-center mt-3">
+        <a href="/portfolio?exchange=<%= exchange %>" class="btn btn-primary">Return to Portfolio</a>
+      </div>
     </div>
   </div>
 </div>
-
-
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon@2.0.2"></script>

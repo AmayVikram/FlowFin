@@ -1,44 +1,37 @@
 <%- include('partials/header') %>
-
 <style>
-    .chart-container {
-  position: relative;
-  height: 400px; /* Set a fixed height */
-  width: 100%;
-}
-
+  .card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+  }
+  .chart-container {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 </style>
-
+```ejs
 <div class="container">
   <div class="row mb-4">
     <div class="col-md-12">
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h3 class="mb-0">Investment Portfolio</h3>
-          <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addStockModal">
-            Add Stock
-          </button>
+      <!-- Investment Portfolio Card -->
+      <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0 text-center" style="font-family: Roboto; font-size: 2.2rem;">Investment Portfolio</h3>
         </div>
         <div class="card-body">
-
-            <div class="card-body bg-white ">
-                <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
-                  <div class="alert alert-success" role="alert" >
-                    <%= success %>
-                  </div>
-                <% } %>
-                <div class="card-body bg-white ">
-                    <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
-                      <div class="alert alert-success" role="alert" >
-                        <%= error %>
-                      </div>
-                    <% } %>
           <!-- Exchange Selector -->
-          <ul class="nav nav-tabs mb-4">
+          <ul class="nav nav-tabs mb-4" 
+              style="display: flex; justify-content: center; border-bottom: none; margin-top: -10px;">
             <li class="nav-item">
-              <a class="nav-link <%= activeExchange === 'NSE' ? 'active' : '' %>" href="/portfolio?exchange=NSE">NSE</a>
+              <a class="nav-link bg-primary text-white <%= activeExchange === 'NSE' ? 'active' : '' %>" 
+                 href="/portfolio?exchange=NSE" 
+                 style="padding: 10px 20px; border-radius: 5px; margin-top: -5px;">
+                NSE
+              </a>
             </li>
-            <li class="nav-item " style="display: none;">
+            <li class="nav-item" style="display: none;">
               <a class="nav-link <%= activeExchange === 'BSE' ? 'active' : '' %>" href="/portfolio?exchange=BSE">BSE</a>
             </li>
           </ul>
@@ -52,51 +45,52 @@
               currentStocks = bseStocks;
             }
           %>
-          
+
           <% if (currentStocks && currentStocks.length > 0) { %>
             <div class="table-responsive">
               <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>Symbol</th>
-                    <th>Shares</th>
-                    <th>Purchase Price</th>
-                    <th>Purchase Date</th>
-                    <th>Current Price</th>
-                    <th>Change</th>
-                    <th>Investment Value</th>
-                    <th>Current Value</th>
-                    <th>Gain/Loss</th>
-                    <th>Actions</th>
+                    <th style="padding: 12px;">Symbol</th>
+                    <th style="padding: 12px;">Shares</th>
+                    <th style="padding: 12px;">Purchase Price</th>
+                    <th style="padding: 12px;">Purchase Date</th>
+                    <th style="padding: 12px;">Current Price</th>
+                    <th style="padding: 12px;">Change</th>
+                    <th style="padding: 12px;">Investment Value</th>
+                    <th style="padding: 12px;">Current Value</th>
+                    <th style="padding: 12px;">Gain/Loss</th>
+                    <th style="padding: 12px;">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <% currentStocks.forEach(stock => { %>
                     <tr>
-                      <td><%= stock.symbol %></td>
-                      <td><%= stock.shares.toFixed(2) %></td>
-                      <td>₹<%= stock.purchasePrice.toFixed(2) %></td>
-                      <td><%= new Date(stock.purchaseDate).toLocaleDateString() %></td>
+                      <td style="padding: 12px;"><%= stock.symbol %></td>
+                      <td style="padding: 12px;"><%= stock.shares.toFixed(2) %></td>
+                      <td style="padding: 12px;">₹<%= stock.purchasePrice.toFixed(2) %></td>
+                      <td style="padding: 12px;"><%= new Date(stock.purchaseDate).toLocaleDateString() %></td>
                       <% if (stock.error) { %>
-                        <td colspan="4" class="text-danger">Error fetching current data</td>
+                        <td colspan="4" class="text-danger" style="padding: 12px;">Error fetching current data</td>
                       <% } else { %>
-                        <td>₹<%= stock.currentPrice.toFixed(2) %></td>
-                        <td class="<%= stock.change >= 0 ? 'text-success' : 'text-danger' %>">
+                        <td style="padding: 12px;">₹<%= stock.currentPrice.toFixed(2) %></td>
+                        <td class="<%= stock.change >= 0 ? 'text-success' : 'text-danger' %>" style="padding: 12px;">
                           <%= stock.change >= 0 ? '+' : '' %><%= stock.change.toFixed(2) %>%
                         </td>
-                        <td>₹<%= stock.investmentValue.toFixed(2) %></td>
-                        <td>₹<%= stock.currentValue.toFixed(2) %></td>
-                        <td class="<%= stock.gain >= 0 ? 'text-success' : 'text-danger' %>">
-                          ₹<%= stock.gain.toFixed(2) %>
+                        <td style="padding: 12px;">₹<%= stock.investmentValue.toFixed(2) %></td>
+                        <td style="padding: 12px;">₹<%= stock.currentValue.toFixed(2) %></td>
+                        <td class="<%= stock.gain >= 0 ? 'text-success' : 'text-danger' %>" style="padding: 12px;">
+                          ₹<%= stock.gain.toFixed(2) %> 
                           (<%= stock.gain >= 0 ? '+' : '' %><%= stock.gainPercentage.toFixed(2) %>%)
                         </td>
                       <% } %>
-                      <td>
-                        <div class="btn-group">
+                      <td style="padding: 12px;">
+                        <div class="btn-group" style="gap: 10px;">
                           <a href="/stock/<%= stock.symbol %>?exchange=<%= stock.exchange %>" class="btn btn-sm btn-info">
                             <i class="bi bi-graph-up"></i>
                           </a>
-                          <form action="/portfolio/delete/<%= stock.id %>" method="POST" onsubmit="return confirm('Are you sure you want to remove this stock from your portfolio?')">
+                          <form action="/portfolio/delete/<%= stock.id %>" method="POST" 
+                                onsubmit="return confirm('Are you sure you want to remove this stock from your portfolio?')">
                             <input type="hidden" name="exchange" value="<%= activeExchange %>">
                             <button type="submit" class="btn btn-sm btn-danger">
                               <i class="bi bi-trash"></i>
@@ -119,77 +113,90 @@
               </button>
             </div>
           <% } %>
-          
-          <!-- Portfolio Summary -->
-          <% if ((nseStocks && nseStocks.length > 0) || (bseStocks && bseStocks.length > 0)) { %>
-            <div class="card mt-4">
-              <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">Portfolio Summary</h5>
+
+          <!-- Add Stock Button (Centered) -->
+          <div class="text-center mt-3">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStockModal">
+              Add Stock
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portfolio Summary Card -->
+      <% if ((nseStocks && nseStocks.length > 0) || (bseStocks && bseStocks.length > 0)) { %>
+        <div class="card shadow mb-4">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0 text-center">Portfolio Summary</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-3">
+                <div class="card text-center h-100">
+                  <div class="card-header bg-primary text-white">Total Investment</div>
+                  <div class="card-body">
+                    <h4 class="card-text">₹<%= totalInvestment.toFixed(2) %></h4>
+                  </div>
+                </div>
               </div>
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-3">
-                    <div class="card text-center h-100">
-                      <div class="card-body">
-                        <h6 class="card-title">Total Investment</h6>
-                        <h4 class="card-text">₹<%= totalInvestment.toFixed(2) %></h4>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <div class="card text-center h-100">
-                      <div class="card-body">
-                        <h6 class="card-title">Current Value</h6>
-                        <h4 class="card-text">₹<%= totalCurrentValue.toFixed(2) %></h4>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <div class="card text-center h-100 <%= totalGain >= 0 ? 'border-success' : 'border-danger' %>">
-                      <div class="card-body">
-                        <h6 class="card-title">Total Gain/Loss</h6>
-                        <h4 class="card-text <%= totalGain >= 0 ? 'text-success' : 'text-danger' %>">
-                          ₹<%= totalGain.toFixed(2) %>
-                        </h4>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <div class="card text-center h-100 <%= totalGainPercentage >= 0 ? 'border-success' : 'border-danger' %>">
-                      <div class="card-body">
-                        <h6 class="card-title">Return</h6>
-                        <h4 class="card-text <%= totalGainPercentage >= 0 ? 'text-success' : 'text-danger' %>">
-                          <%= totalGainPercentage >= 0 ? '+' : '' %><%= totalGainPercentage.toFixed(2) %>%
-                        </h4>
-                      </div>
-                    </div>
+              <div class="col-md-3">
+                <div class="card text-center h-100">
+                  <div class="card-header bg-primary text-white">Current Value</div>
+                  <div class="card-body">
+                    <h4 class="card-text">₹<%= totalCurrentValue.toFixed(2) %></h4>
                   </div>
                 </div>
-                
-                <!-- Portfolio Allocation Chart -->
-                <div class="row mt-4">
-                  <div class="col-md-6">
-                    <h5 class="text-center mb-3">Portfolio Allocation</h5>
-                    <div class="chart-container">
-                    <canvas id="allocationChart" height="300"></canvas>
-                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card text-center h-100 <%= totalGain >= 0 ? 'border-success' : 'border-danger' %>">
+                  <div class="card-header bg-primary text-white">Total Gain/Loss</div>
+                  <div class="card-body">
+                    <h4 class="card-text <%= totalGain >= 0 ? 'text-success' : 'text-danger' %>">
+                      ₹<%= totalGain.toFixed(2) %>
+                    </h4>
                   </div>
-                  <div class="col-md-6">
-                    <h5 class="text-center mb-3">Performance by Stock</h5>
-                    <div class="chart-container">
-                    <canvas id="performanceChart" height="300"></canvas>
                 </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card text-center h-100 <%= totalGainPercentage >= 0 ? 'border-success' : 'border-danger' %>">
+                  <div class="card-header bg-primary text-white">Return</div>
+                  <div class="card-body">
+                    <h4 class="card-text <%= totalGainPercentage >= 0 ? 'text-success' : 'text-danger' %>">
+                      <%= totalGainPercentage >= 0 ? '+' : '' %><%= totalGainPercentage.toFixed(2) %>%
+                    </h4>
                   </div>
                 </div>
               </div>
             </div>
-          <% } %>
+          </div>
         </div>
-      </div>
+
+        <!-- Portfolio Charts Card -->
+        <div class="card shadow">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0 text-center">Portfolio Charts</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h5 class="text-center mb-3">Portfolio Allocation</h5>
+                <div class="chart-container">
+                  <canvas id="allocationChart" style="max-height: 400px;"></canvas>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h5 class="text-center mb-3">Performance by Stock</h5>
+                <div class="chart-container">
+                  <canvas id="performanceChart" style="max-height: 400px;"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
     </div>
   </div>
 </div>
-
 <!-- Add Stock Modal -->
 <div class="modal fade" id="addStockModal" tabindex="-1" aria-labelledby="addStockModalLabel" aria-hidden="true">
   <div class="modal-dialog">

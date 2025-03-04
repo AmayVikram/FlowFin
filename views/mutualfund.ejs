@@ -1,95 +1,90 @@
 <%- include('partials/header') %>
 <div class="container">
     <div class="card shadow">
-      <div class="card-header bg-primary text-white">
-        <h3 class="mb-0">Mutual Fund Return Calculator</h3>
-      </div>
-      <div class="card-body">
-        <div class="mb-3">
-          <label class="form-label">Investment Type</label>
-          <div class="btn-group w-100" role="group">
-            <input type="radio" class="btn-check" name="investmentType" id="lumpsum" value="lumpsum" checked>
-            <label class="btn btn-outline-primary" for="lumpsum">Lump Sum</label>
-            
-            <input type="radio" class="btn-check" name="investmentType" id="sip" value="sip">
-            <label class="btn btn-outline-primary" for="sip">SIP</label>
-          </div>
-        </div>
-        
-        <div id="lumpsumFields">
-          <div class="mb-3">
-            <label for="lumpsumAmount" class="form-label">Investment Amount (₹)</label>
-            <input type="number" class="form-control" id="lumpsumAmount" placeholder="e.g., 100000">
-          </div>
-        </div>
-        
-        <div id="sipFields" style="display: none;">
-          <div class="mb-3">
-            <label for="sipAmount" class="form-label">Monthly SIP Amount (₹)</label>
-            <input type="number" class="form-control" id="sipAmount" placeholder="e.g., 5000">
-          </div>
-        </div>
-        
-        <div class="mb-3">
-          <label for="duration" class="form-label">Investment Duration (Years)</label>
-          <input type="number" class="form-control" id="duration" placeholder="e.g., 10">
-        </div>
-        
-        <div class="mb-3">
-          <label for="returnRate" class="form-label">Expected Rate of Return (% p.a.)</label>
-          <input type="number" class="form-control" id="returnRate" placeholder="e.g., 12">
-        </div>
-        
-        <div class="d-grid">
-          <button id="calculateBtn" class="btn btn-primary">Calculate Returns</button>
-        </div>
-        
-        <div id="resultSection" class="mt-4" style="display: none;">
-          <div class="card bg-light">
-            <div class="card-body">
-              <h4 class="card-title text-center">Investment Summary</h4>
-              <div class="row text-center">
-                <div class="col-md-4">
-                  <div class="card mb-3">
-                    <div class="card-body">
-                      <h6 class="card-subtitle mb-2 text-muted">Total Investment</h6>
-                      <h4 id="totalInvestment" class="card-title">₹0</h4>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="card mb-3 border-success">
-                    <div class="card-body">
-                      <h6 class="card-subtitle mb-2 text-muted">Estimated Returns</h6>
-                      <h4 id="estimatedReturns" class="card-title text-success">₹0</h4>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="card mb-3">
-                    <div class="card-body">
-                      <h6 class="card-subtitle mb-2 text-muted">Total Value</h6>
-                      <h4 id="totalValue" class="card-title">₹0</h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="mt-3">
-                <canvas id="investmentChart" height="250"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <script src="/js/mutualfundscal.js"></script>
+       <div class="card-header bg-primary text-white">
+         <h3 class="mb-0" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Mutual Fund Return Calculator</h3>
+       </div>
+       <div class="card-body">
+         <div class="mb-3">
+           <label class="form-label" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Investment Type</label>
+           <div class="btn-group w-100" role="group">
+             <input type="radio" class="btn-check" name="investmentType" id="lumpsum" value="lumpsum" checked>
+             <label class="btn btn-outline-primary" for="lumpsum" style="background-color: var(--header-bg); color: white;">Lump Sum</label>
+             
+             <input type="radio" class="btn-check" name="investmentType" id="sip" value="sip">
+             <label class="btn btn-outline-primary" for="sip" style="background-color:  var(--header-bg); color: white;">SIP</label>
+           </div>
+         </div>
+         
+         <div id="lumpsumFields">
+           <div class="mb-3">
+             <label for="lumpsumAmount" class="form-label" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Investment Amount (₹)</label>
+             <input type="number" class="form-control" id="lumpsumAmount" placeholder="e.g., 100000" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">
+           </div>
+         </div>
+         
+         <div id="sipFields" style="display: none;">
+           <div class="mb-3">
+             <label for="sipAmount" class="form-label" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Monthly SIP Amount (₹)</label>
+             <input type="number" class="form-control" id="sipAmount" placeholder="e.g., 5000" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">
+           </div>
+         </div>
+         
+         <div class="mb-3">
+           <label for="duration" class="form-label" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Investment Duration (Years)</label>
+           <input type="number" class="form-control" id="duration" placeholder="e.g., 10" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">
+         </div>
+         
+         <div class="mb-3">
+           <label for="returnRate" class="form-label" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Expected Rate of Return (% p.a.)</label>
+           <input type="number" class="form-control" id="returnRate" placeholder="e.g., 12" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">
+         </div>
+         
+         <div class="d-grid">
+           <button id="calculateBtn" class="btn btn-primary" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Calculate Returns</button>
+         </div>
+         
+         <div id="resultSection" class="mt-4" style="display: none;">
+           <div class="card bg-light">
+             <div class="card-body">
+               <h4 class="card-title text-center" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Investment Summary</h4>
+               <div class="row text-center">
+                 <div class="col-md-4">
+                   <div class="card mb-3">
+                     <div class="card-body">
+                       <h6 class="card-subtitle mb-2 text-muted" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Total Investment</h6>
+                       <h4 id="totalInvestment" class="card-title" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">₹0</h4>
+                     </div>
+                   </div>
+                 </div>
+                 <div class="col-md-4">
+                   <div class="card mb-3 border-success">
+                     <div class="card-body">
+                       <h6 class="card-subtitle mb-2 text-muted" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Estimated Returns</h6>
+                       <h4 id="estimatedReturns" class="card-title text-success" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">₹0</h4>
+                     </div>
+                   </div>
+                 </div>
+                 <div class="col-md-4">
+                   <div class="card mb-3">
+                     <div class="card-body">
+                       <h6 class="card-subtitle mb-2 text-muted" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">Total Value</h6>
+                       <h4 id="totalValue" class="card-title" style="font-family: 'Roboto', sans-serif; font-size: 1.2rem;">₹0</h4>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+               
+               <div class="mt-3">
+                 <canvas id="investmentChart" height="250"></canvas>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
     
-    
-
-  <%- include('partials/footer') %>
-  
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/js/mutualfundscal.js"></script>
+<%- include('partials/footer') %>
