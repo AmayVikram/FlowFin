@@ -2002,6 +2002,8 @@ app.get('/stock/:symbol', ensureAuthenticated, async (req, res) => {
     
     // Get stock quote
     const quote = await yahooFinance.quote(yahooSymbol);
+
+   
     
     // Get historical data (1 year by default)
     const oneYearAgo = new Date();
@@ -2168,6 +2170,17 @@ app.get('/api/stock/:symbol/historical', ensureAuthenticated, async (req, res) =
     console.error(err);
     res.status(500).json({ error: err.message });
   }
+});
+
+
+// miscellaneous
+
+// Mutual Fund Calculator Route
+app.get('/mutual-fund-calculator', ensureAuthenticated, (req, res) => {
+  res.render('mutual-fund-calculator', {
+    title: 'Mutual Fund Return Calculator',
+    user: req.user
+  });
 });
 
 
