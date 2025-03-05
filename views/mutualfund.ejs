@@ -1,4 +1,11 @@
 <%- include('partials/header') %>
+
+<style>
+#mutual-fund-type-select input[type="radio"]:checked + label{
+    background-color: #055361;
+    border-color: #055361;
+}
+</style>
 <div class="container">
     <div class="card shadow">
       <div class="card-header bg-primary text-white">
@@ -7,7 +14,7 @@
       <div class="card-body">
         <div class="mb-3">
           <label class="form-label">Investment Type</label>
-          <div class="btn-group w-100" role="group">
+          <div class="btn-group w-100" role="group" id="mutual-fund-type-select">
             <input type="radio" class="btn-check" name="investmentType" id="lumpsum" value="lumpsum" checked>
             <label class="btn btn-outline-primary" for="lumpsum">Lump Sum</label>
             
@@ -45,13 +52,14 @@
         </div>
         
         <div id="resultSection" class="mt-4" style="display: none;">
-          <div class="card bg-light">
+          <div class="card " >
             <div class="card-body">
               <h4 class="card-title text-center">Investment Summary</h4>
               <div class="row text-center">
                 <div class="col-md-4">
                   <div class="card mb-3">
                     <div class="card-body">
+                      <i class="bi bi-arrow-up fs-1 mb-2"></i>
                       <h6 class="card-subtitle mb-2 text-muted">Total Investment</h6>
                       <h4 id="totalInvestment" class="card-title">₹0</h4>
                     </div>
@@ -59,15 +67,18 @@
                 </div>
                 <div class="col-md-4">
                   <div class="card mb-3 border-success">
-                    <div class="card-body">
-                      <h6 class="card-subtitle mb-2 text-muted">Estimated Returns</h6>
+                    <div class="card-body " >
+                      <i class="bi bi-arrow-down fs-1 mb-2"></i>
+
+                      <h6 class="card-subtitle mb-2 text-muted ">Estimated Returns</h6>
                       <h4 id="estimatedReturns" class="card-title text-success">₹0</h4>
                     </div>
                   </div>
                 </div>
                 <div class="col-md-4">
                   <div class="card mb-3">
-                    <div class="card-body">
+                    <div class="card-body ">
+                      <i class="bi bi-currency-rupee fs-1 mb-2"></i>
                       <h6 class="card-subtitle mb-2 text-muted">Total Value</h6>
                       <h4 id="totalValue" class="card-title">₹0</h4>
                     </div>

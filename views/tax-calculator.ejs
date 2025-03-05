@@ -1,23 +1,30 @@
 <%- include('partials/header') %>
 
+<style>
+  #tax-regime-select input[type="radio"]:checked + label{
+    background-color: #055361;
+    border-color: #055361;
+}
+</style>
+
 <div class="container">
   <div class="row mb-4">
     <div class="col-md-12">
       <div class="card shadow">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h3 class="mb-0"><i class="bi bi-receipt me-2"></i>Income Tax Calculator (FY 2024-25)</h3>
+        <div class="card-header bg-primary text-white" style="text-align: center;">
+          <h3 class="mb-0" ><i class="bi bi-receipt me-2"></i>Income Tax Calculator (FY 2024-25)</h3>
         </div>
         <div class="card-body">
           <div class="row">
             <div class="col-md-6">
               <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header text-white">
                   <h5 class="mb-0">Tax Regime Selection</h5>
                 </div>
                 <div class="card-body">
                   <div class="mb-3">
                     <label class="form-label">Choose Tax Regime</label>
-                    <div class="btn-group w-100" role="group">
+                    <div class="btn-group w-100" role="group" id="tax-regime-select">
                       <input type="radio" class="btn-check" name="taxRegime" id="newRegime" value="new" checked>
                       <label class="btn btn-outline-primary" for="newRegime">New Regime</label>
                       
@@ -39,7 +46,7 @@
               </div>
               
               <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header text-white">
                   <h5 class="mb-0">Income Details</h5>
                 </div>
                 <div class="card-body">
@@ -62,7 +69,7 @@
               </div>
               
               <div id="oldRegimeDeductions" class="card mb-4" style="display: none;">
-                <div class="card-header">
+                <div class="card-header text-white">
                   <h5 class="mb-0">Deductions & Exemptions (Old Regime)</h5>
                 </div>
                 <div class="card-body">
@@ -116,7 +123,7 @@
             
             <div class="col-md-6">
               <div id="resultSection" class="card" style="display: none;">
-                <div class="card-header bg-dark text-white">
+                <div class="card-header bg-primary text-white" style="border-bottom:none ;">
                   <h5 class="mb-0">Tax Calculation Results</h5>
                 </div>
                 <div class="card-body">

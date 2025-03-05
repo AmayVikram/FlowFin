@@ -93,7 +93,7 @@
                       <% } %>
                       <td>
                         <div class="btn-group">
-                          <a href="/stock/<%= stock.symbol %>?exchange=<%= stock.exchange %>" class="btn btn-sm btn-info">
+                          <a href="/stock/<%= stock.symbol %>?exchange=<%= stock.exchange %>" class="btn btn-sm btn-info" style="margin-right:5px; border-radius: 6px;">
                             <i class="bi bi-graph-up"></i>
                           </a>
                           <form action="/portfolio/delete/<%= stock.id %>" method="POST" onsubmit="return confirm('Are you sure you want to remove this stock from your portfolio?')">
@@ -123,14 +123,15 @@
           <!-- Portfolio Summary -->
           <% if ((nseStocks && nseStocks.length > 0) || (bseStocks && bseStocks.length > 0)) { %>
             <div class="card mt-4">
-              <div class="card-header bg-dark text-white">
+              <div class="card-header text-white" style="background-color: #5dd7c3;">
                 <h5 class="mb-0">Portfolio Summary</h5>
               </div>
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-3">
                     <div class="card text-center h-100">
-                      <div class="card-body">
+                      <div class="card-body text-white"style="background-color: #5dd7c3;">
+                        <i class="bi bi-piggy-bank fs-1 mb-2"></i>
                         <h6 class="card-title">Total Investment</h6>
                         <h4 class="card-text">₹<%= totalInvestment.toFixed(2) %></h4>
                       </div>
@@ -138,7 +139,9 @@
                   </div>
                   <div class="col-md-3">
                     <div class="card text-center h-100">
-                      <div class="card-body">
+                      <div class="card-body text-white" style="background-color: #5dd7c3;">
+                        <i class="bi bi-cash-coin fs-1 mb-2"></i>
+                        
                         <h6 class="card-title">Current Value</h6>
                         <h4 class="card-text">₹<%= totalCurrentValue.toFixed(2) %></h4>
                       </div>
@@ -146,9 +149,11 @@
                   </div>
                   <div class="col-md-3">
                     <div class="card text-center h-100 <%= totalGain >= 0 ? 'border-success' : 'border-danger' %>">
-                      <div class="card-body">
+                      <div class="card-body text-white <%= totalGain >= 0 ? 'bg-success' : 'bg-danger' %> ">
+                        <i class="bi bi-arrow-repeat fs-1 mb-2"></i>
+
                         <h6 class="card-title">Total Gain/Loss</h6>
-                        <h4 class="card-text <%= totalGain >= 0 ? 'text-success' : 'text-danger' %>">
+                        <h4 class="card-text">
                           ₹<%= totalGain.toFixed(2) %>
                         </h4>
                       </div>
@@ -156,9 +161,11 @@
                   </div>
                   <div class="col-md-3">
                     <div class="card text-center h-100 <%= totalGainPercentage >= 0 ? 'border-success' : 'border-danger' %>">
-                      <div class="card-body">
+                      <div class="card-body text-white <%= totalGainPercentage >= 0 ? 'bg-success' : 'bg-danger' %>">
+                        <i class="bi bi-percent fs-1 mb-2"></i>
+
                         <h6 class="card-title">Return</h6>
-                        <h4 class="card-text <%= totalGainPercentage >= 0 ? 'text-success' : 'text-danger' %>">
+                        <h4 class="card-text">
                           <%= totalGainPercentage >= 0 ? '+' : '' %><%= totalGainPercentage.toFixed(2) %>%
                         </h4>
                       </div>
@@ -189,6 +196,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- Add Stock Modal -->
 <div class="modal fade" id="addStockModal" tabindex="-1" aria-labelledby="addStockModalLabel" aria-hidden="true">

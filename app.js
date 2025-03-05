@@ -456,12 +456,25 @@ app.post('/transactions/add', ensureAuthenticated, async (req, res) => {
 
 app.get('/transactions', ensureAuthenticated, async (req, res) => {
   try {
-    const { type, category, sort } = req.query;
+    const { type, category, month, sort } = req.query;
     
     // Build filter
     let filter = { user: req.user.id };
     if (type) filter.type = type;
     if (category) filter.category = category;
+    
+    // Add month filter
+    if (month) {
+      // Create date range for the selected month in the current year
+      const currentYear = new Date().getFullYear();
+      const startDate = new Date(currentYear, parseInt(month) - 1, 1); // Month is 0-indexed in JS Date
+      const endDate = new Date(currentYear, parseInt(month), 0); // Last day of the month
+      
+      filter.date = {
+        $gte: startDate,
+        $lte: endDate
+      };
+    }
     
     // Build sort
     let sortOption = { date: -1 }; // Default sort by date descending
@@ -482,14 +495,32 @@ app.get('/transactions', ensureAuthenticated, async (req, res) => {
           break;
       }
     }
+    
     const user = await User.findById(req.user.id);
+    
     // Get transactions
     const transactions = await Transaction.find(filter).sort(sortOption);
     
-    // Calculate totals
-    const totalIncome = user.financialSummary?.totalIncome || 0;
-    const totalExpense = user.financialSummary?.totalExpense || 0;
-    const balance = user.financialSummary?.balance || 0;
+    // Calculate filtered totals if month is selected
+    let totalIncome, totalExpense, balance;
+    
+    if (month) {
+      // Calculate totals based on filtered transactions
+      totalIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      totalExpense = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      balance = totalIncome - totalExpense;
+    } else {
+      // Use stored totals from user profile
+      totalIncome = user.financialSummary?.totalIncome || 0;
+      totalExpense = user.financialSummary?.totalExpense || 0;
+      balance = user.financialSummary?.balance || 0;
+    }
     
     // Get unique categories for filter dropdown
     const categories = await Transaction.distinct('category', { user: req.user.id });
@@ -503,6 +534,7 @@ app.get('/transactions', ensureAuthenticated, async (req, res) => {
       categories,
       type: type || '',
       category: category || '',
+      month: month || '',
       sort: sort || 'date_desc'
     });
   } catch (err) {
@@ -511,6 +543,7 @@ app.get('/transactions', ensureAuthenticated, async (req, res) => {
     res.redirect('/dashboard');
   }
 });
+
 
 
 app.get('/transactions/edit/:id', ensureAuthenticated, async (req, res) => {
