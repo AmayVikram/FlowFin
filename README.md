@@ -33,7 +33,7 @@ The system offers features like spend analysis through visual charts, budget cre
 ---
 
 ## 4. Email Reminder Example
-*(Add screenshots here if available)*  
+ 
 - If a Bill is within due date we will send a reminder to user through mail
 - ![Screenshot 2025-03-05 205029](https://github.com/user-attachments/assets/0e19bf4f-4e55-45cf-9404-909321cfe9f1)
 - ![Screenshot 2025-03-05 205149](https://github.com/user-attachments/assets/6feae899-334b-4806-938a-6c740a65f60d)
