@@ -33,8 +33,10 @@ The system offers features like spend analysis through visual charts, budget cre
 
 ## 4. Email Reminder Example
 *(Add screenshots here if available)*  
-If a Bill is within due date we will send a reminder to user through mail
-![ Email Screenshot 1] (https://ibb.co/yms2W4j6)
+- If a Bill is within due date we will send a reminder to user through mail
+- ![ Email Service Screenshot 1](https://ibb.co/yms2W4j6)
+- ![ Email Service Screenshot 2](https://ibb.co/YBqbRYyv)
+- ![ Email Service Screenshot 3](https://ibb.co/XkrRDNyR)  
 
 ---
 
@@ -51,6 +53,7 @@ If a Bill is within due date we will send a reminder to user through mail
 - Gemini API (for AI Financial Assistant and PDF Report generation)
 - Yahoo Finance (for stock price tracking)
 - Google OAuth 2.0 (for user authentication)
+- Nodemailer (for sending emails)
 
 ---
 
