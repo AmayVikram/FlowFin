@@ -15,7 +15,7 @@ The website is a Personal Finance Management (PFM) system that helps users take 
 - Setting Financial Goals
 - Calculators and Graphs For Mutual Fund Investments and Income Taxes.
 - A Income Tax Report PDF Generator
-- Secure data storage and retrieval
+- Secure data storage and User Authentication
 - A bill and payments reminder system
 - Custom PDF Report Generation using AI giving Financial Insights
 - An AI Financial Assistant Chatbot
@@ -43,4 +43,7 @@ Example:
 - ejs
 
 ---
-
+## 6. Technologies Used
+ - Gemini
+ - Yahoo Finance
+ - Google Auth 2.0
