@@ -1,4 +1,4 @@
-# FlowFin - Hackathon Submission
+# FlowFin - DevBits Submission
 
 ## 1. Project Title
 **FlowFin - Financial Flow Management System**
