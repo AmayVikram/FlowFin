@@ -6,19 +6,25 @@ The website is a Personal Finance Management (PFM) system that helps users take 
 ---
 
 ## 2. Features Implemented
-- User authentication and profile management
-- Add, edit, and delete income and expense entries
+- Add, edit, and delete income and expense transactions
+- Filter and Sort Transaction by month,date,amount and Categories
 - Real-time financial summary dashboard
-- Visualization charts for income vs expenses
-- Budget tracking and alerts
-- Mobile responsive design
+- Charts for visualizing Trends in income and Transactions
+- Import/Export Transactions as CSV
+- A Stock and investment Portfolio to monitor Real Time value of their stocks and corresponding returns
+- Setting Financial Goals
+- Calculators and Graphs For Mutual Fund Investments and Income Taxes.
+- A Income Tax Report PDF Generator
 - Secure data storage and retrieval
+- A bill and payments reminder system
+- Custom PDF Report Generation using AI giving Financial Insights
+- An AI Financial Assistant Chatbot
+  
 
 ---
 
-## 3. Hosted Links
-- **Frontend URL:** [Deployed Link Here](#)
-- **Backend URL:** [API Documentation or Backend Link Here](#)
+## 3. Hosted Link
+- https://flowfin-2.onrender.com
 
 ---
 
@@ -29,41 +35,12 @@ Example:
 
 ---
 
-## 5. Technologies Used
-- **Frontend:** React, Tailwind CSS
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB
-- **Authentication:** JWT (JSON Web Tokens)
-- **Deployment:** Vercel (Frontend), Render (Backend)
+## 5. Tech Stack
+- Nodejs
+- Express
+- MongoDB
+- Passport js
+- ejs
 
 ---
 
-## 6. API Endpoints (optional)
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-
-### Transactions
-- `GET /api/transactions` - Fetch all transactions
-- `POST /api/transactions` - Add new transaction
-- `PUT /api/transactions/:id` - Update transaction
-- `DELETE /api/transactions/:id` - Delete transaction
-
-### Profile
-- `GET /api/profile` - Fetch user profile data
-
----
-
-## 7. How to Run Locally
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/flowfin.git
-
-# Navigate to project folder
-cd flowfin
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
