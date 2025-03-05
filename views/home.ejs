@@ -1,3 +1,216 @@
 <%- include('partials/header') %>
-this is home
+<div class="container-fluid px-4 py-5">
+    <div class="hero text-center mb-5">
+        <h1 class="title text-white">Welcome to <span class="brand-name">FlowFin</span></h1>
+        <p class="subtitle">One platform to manage all your financial issues</p>
+        <p class="salient-features text-white">Our Salient Features</p>
+    </div>
+
+    <div class="features">
+        <div class="features-grid">
+            <!-- Balance Sheet Card -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <h3>Balance Sheet</h3>
+                <p>Comprehensive financial tracking with income and expenditure history, bank balance, transaction graphs, and easy CSV reporting.</p>
+            </div>
+
+            <!-- Tax Calculator Card -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-calculator"></i>
+                </div>
+                <h3>Tax Calculator</h3>
+                <p>Advanced tax management with income tax calculation, return generation, and comparative analysis of tax regimes.</p>
+            </div>
+
+            <!-- Financial Goals Card -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-bullseye"></i>
+                </div>
+                <h3>Financial Goals</h3>
+                <p>Set and track financial targets, monitor savings progression, and make contributions based on bank balance.</p>
+            </div>
+
+            <!-- Investment Tracker Card -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-coin"></i>
+                </div>
+                <h3>Investment Tracker</h3>
+                <p>Create and manage stock portfolios, track real-time prices, calculate gains/losses, and analyze historical data.</p>
+            </div>
+
+            <!-- Reminders Card -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-bell"></i>
+                </div>
+                <h3>Reminders</h3>
+                <p>Manage upcoming bills with email alerts, track payment status, and maintain lists of paid and overdue bills.</p>
+            </div>
+
+            <!-- Return Calculator Card -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-graph-down-arrow"></i>
+                </div>
+                <h3>Return Calculator</h3>
+                <p>Calculate potential returns for mutual fund investments, estimate CAGR, and project long-term investment scenarios.</p>
+            </div>
+
+            <!-- AI Assistant Card -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <h3>AI Assistant</h3>
+                <p>Get personalized financial advice, ask questions about investment strategies, tax planning, and receive instant, intelligent insights.</p>
+            </div>
+
+            <!-- Financial Reports Card -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <h3>Financial Insights</h3>
+                <p>Access comprehensive monthly financial reports, gain actionable insights, track spending patterns, and receive personalized financial health recommendations.</p>
+            </div>
+
+            <!-- ITR Generator Card -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <h3>Tax Return Blueprint</h3>
+                <p>Generate a preliminary income tax return draft, provide detailed tax calculations, highlight potential deductions, and create a structured starting point for filing.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #A8E0D7 0%, #A8E0D7 100%);
+    }
+
+    .hero .title {
+        color: white;
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+        display: inline-block;
+    }
+
+    .brand-name {
+        color: #055361;
+    }
+
+    .hero .title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, #6c63ff, #ff6584);
+        border-radius: 2px;
+    }
+
+    .salient-features {
+        color: white;
+        font-size: 1.3rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .subtitle {
+        color: rgba(255,255,255,0.8);
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-top: 2rem;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 0 15px;
+    }
+
+    .feature-card {
+        background-color: white;
+        border-radius: 16px;
+        padding: 1.8rem 1.2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        text-align: center;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .feature-icon {
+        width: 65px;
+        height: 65px;
+        margin: 0 auto 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        color: #6c63ff;
+        font-size: 1.6rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        background-color: #6c63ff;
+        color: white;
+        transform: rotateY(180deg);
+    }
+
+    .feature-card h3 {
+        margin-bottom: 0.8rem;
+        font-size: 1.2rem;
+        color: #333;
+        transition: color 0.3s ease;
+    }
+
+    .feature-card p {
+        font-size: 0.95rem;
+        color: #666;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 1200px) {
+        .features-grid {
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 1000px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .features-grid {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 800px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .features-grid {
+            grid-template-columns: 1fr;
+            max-width: 100%;
+        }
+    }
+</style>
 <%- include('partials/footer') %>

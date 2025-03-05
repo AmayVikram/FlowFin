@@ -26,6 +26,7 @@
             <div class="col-md-3">
               <div class="card bg-primary text-white">
                 <div class="card-body text-center">
+                  <i class="bi bi-bullseye fs-1 mb-2"></i>
                   <h5>Total Goals</h5>
                   <h3><%= goals.length %></h3>
                 </div>
@@ -34,6 +35,7 @@
             <div class="col-md-3">
               <div class="card bg-success text-white">
                 <div class="card-body text-center">
+                  <i class="bi bi-check-circle fs-1 mb-2"></i>
                   <h5>Completed</h5>
                   <h3><%= goals.filter(goal => goal.isCompleted).length %></h3>
                 </div>
@@ -42,6 +44,7 @@
             <div class="col-md-3">
               <div class="card bg-info text-white">
                 <div class="card-body text-center">
+                  <i class="bi bi-graph-up fs-1 mb-2"></i>
                   <h5>On Track</h5>
                   <h3><%= goals.filter(goal => !goal.isCompleted && goal.isOnTrack).length %></h3>
                 </div>
@@ -50,6 +53,7 @@
             <div class="col-md-3">
               <div class="card bg-warning text-white">
                 <div class="card-body text-center">
+                  <i class="bi bi-exclamation-triangle fs-1 mb-2"></i>
                   <h5>Needs Attention</h5>
                   <h3><%= goals.filter(goal => !goal.isCompleted && !goal.isOnTrack).length %></h3>
                 </div>
