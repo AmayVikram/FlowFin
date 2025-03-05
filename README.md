@@ -2,10 +2,7 @@
 
 ## 1. Project Title
 **FlowFin - Financial Flow Management System**
-
-### Problem Statement
-
-
+The website is a Personal Finance Management (PFM) system that helps users take control of their finances. It provides tools for expense tracking, budgeting, goal setting,financial analysis,Taxes,Investment,AI Assitant and pdf generation tools for smart budgeting. The system offers features like spend analysis through visual charts, budget creation and monitoring, goal tracking, transaction history, and financial dashboards that give users an overview of their financial status. 
 ---
 
 ## 2. Features Implemented
