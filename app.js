@@ -466,7 +466,10 @@ app.get('/transactions', ensureAuthenticated, async (req, res) => {
       // Create date range for the selected month in the current year
       const currentYear = new Date().getFullYear();
       const startDate = new Date(currentYear, parseInt(month) - 1, 1); // Month is 0-indexed in JS Date
+      
+      // Create end date as the last day of the month with time set to end of day
       const endDate = new Date(currentYear, parseInt(month), 0); // Last day of the month
+      endDate.setHours(23, 59, 59, 999); // Set to end of day
       
       filter.date = {
         $gte: startDate,
