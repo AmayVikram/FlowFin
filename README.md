@@ -31,10 +31,10 @@ The system offers features like spend analysis through visual charts, budget cre
 
 ---
 
-## 4. Screenshots (optional)
+## 4. Email Reminder Example
 *(Add screenshots here if available)*  
-Example:  
-![Dashboard Screenshot](https://via.placeholder.com/600x300.png?text=Dashboard+Screenshot)
+If a Bill is within due date we will send a reminder to user through mail
+![ Email Screenshot 1] (https://ibb.co/yms2W4j6)
 
 ---
 
