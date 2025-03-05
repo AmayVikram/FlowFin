@@ -100,7 +100,7 @@ The system offers features like spend analysis through visual charts, budget cre
 
 4. Start the Application
     ```bash
-    npm start
+    node app.js
     ```
     Access the app at: [http://localhost:3000](http://localhost:3000)
 
