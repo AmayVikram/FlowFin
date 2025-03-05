@@ -28,6 +28,7 @@ The system offers features like spend analysis through visual charts, budget cre
 
 ## 3. Hosted Link
 - [FlowFin - Live Demo](https://flowfin-2.onrender.com)
+- [FlowFin demo Video](https://youtu.be/1aOfi2Q94xM)
 
 ---
 
