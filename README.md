@@ -4,7 +4,7 @@
 **FlowFin - Financial Flow Management System**
 
 ### Problem Statement
-Managing personal finances and tracking expenses can be overwhelming for users without a clear and user-friendly system. FlowFin provides an intuitive platform to track income, expenses, and financial goals effortlessly.
+
 
 ---
 
