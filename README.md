@@ -88,7 +88,7 @@ The system offers features like spend analysis through visual charts, budget cre
 
     EMAIL_SERVICE=gmail (or some other service)
     EMAIL_USER=your_email@example.com
-    EMAIL_PASSWORD=your_app_password of the email service (For Gmail u can get an app password by enabling 2 step verification
+    EMAIL_PASSWORD=your_app_password of the email service (For Gmail u can get an app password by enabling 2 step verification)
 
     APP_URL=http://localhost:3000
 
