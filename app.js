@@ -127,10 +127,8 @@ app.use('/', authRoutes);
 
 // Routes
 app.get('/', (req, res) => {
-  if (req.isAuthenticated()) {
-    return res.redirect('/dashboard');
-  }
-  res.render('login', { title: 'Login'});
+  
+  res.render('home', { title: 'Home'});
 });
 
 // Login route
